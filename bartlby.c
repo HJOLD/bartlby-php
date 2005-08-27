@@ -433,6 +433,7 @@ PHP_FUNCTION(bartlby_get_worker) {
 		add_assoc_long(return_value, "escalation_count", wrkmap[Z_LVAL_P(bartlby_worker_id)].escalation_count);
 		add_assoc_long(return_value, "escalation_time", wrkmap[Z_LVAL_P(bartlby_worker_id)].escalation_time);
 		shmdt(bartlby_address);
+		
 	/*	
 	char  mail[2048];
 	char  icq[2048];
