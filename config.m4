@@ -60,4 +60,5 @@ if test "$PHP_BARTLBY" != "no"; then
   dnl PHP_SUBST(BARTLBY_SHARED_LIBADD)
 
   PHP_NEW_EXTENSION(bartlby, bartlby.c, $ext_shared)
+  
 fi

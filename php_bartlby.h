@@ -37,6 +37,14 @@ extern zend_module_entry bartlby_module_entry;
 #include <sys/types.h>
 #include <sys/shm.h>
 
+#define LOAD_SYMBOL(x,y,z) 	x=dlsym(y, z); \
+    	if((dlmsg=dlerror()) != NULL) { \
+        	php_error(E_WARNING, "dl error: %s", dlmsg);	\
+		RETURN_FALSE;	\
+    	}
+    	
+
+#define BARTLBY_VERSION "0.9.1"
 
 PHP_MINIT_FUNCTION(bartlby);
 PHP_MSHUTDOWN_FUNCTION(bartlby);
@@ -48,7 +56,13 @@ PHP_FUNCTION(confirm_bartlby_compiled);	/* For testing, remove later. */
 PHP_FUNCTION(bartlby_get_worker);	/* For testing, remove later. */
 PHP_FUNCTION(bartlby_get_service);	/* For testing, remove later. */
 PHP_FUNCTION(bartlby_get_info);	/* For testing, remove later. */
-
+PHP_FUNCTION(bartlby_version);
+PHP_FUNCTION(bartlby_config);
+PHP_FUNCTION(bartlby_lib_info);
+PHP_FUNCTION(bartlby_add_server);
+PHP_FUNCTION(bartlby_delete_server);
+PHP_FUNCTION(bartlby_modify_server);
+PHP_FUNCTION(bartlby_get_server_by_id);
 
 /* 
   	Declare any global variables you may need between the BEGIN

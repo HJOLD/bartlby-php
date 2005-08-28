@@ -46,7 +46,13 @@ function_entry bartlby_functions[] = {
 	PHP_FE(bartlby_get_service,	NULL)		/* For testing, remove later. */
 	PHP_FE(bartlby_get_worker,	NULL)		/* For testing, remove later. */
 	PHP_FE(bartlby_get_info,	NULL)		/* For testing, remove later. */
-	
+	PHP_FE(bartlby_version,	NULL)		/* For testing, remove later. */
+	PHP_FE(bartlby_config,	NULL)		/* For testing, remove later. */
+	PHP_FE(bartlby_lib_info, NULL)
+	PHP_FE(bartlby_add_server,NULL)
+	PHP_FE(bartlby_delete_server,NULL)
+	PHP_FE(bartlby_modify_server,NULL)
+	PHP_FE(bartlby_get_server_by_id,NULL)
 	{NULL, NULL, NULL}	/* Must be the last line in bartlby_functions[] */
 };
 /* }}} */
@@ -104,8 +110,10 @@ char * getConfigValue(char * key, char * fname) {
 	char * tok;
 	
 	fp=fopen(fname, "r");
-	if(!fp) 
+	if(!fp) {
+		printf("fopen %s failed\n", fname);
 		return NULL;
+	}
 	
 	while(fgets(str,1024,fp) != NULL) {
 		str[strlen(str)-1]='\0';
@@ -134,6 +142,46 @@ char * getConfigValue(char * key, char * fname) {
 	return NULL;
 }
 
+void * bartlby_get_sohandle(char * cfgfile) {
+	char * data_lib;
+	char * dlmsg;
+	void * SOHandle;
+	
+	data_lib=getConfigValue("data_library", cfgfile);
+	if(data_lib == NULL) {
+		php_error(E_WARNING, "cannot find data_lib key in %s", cfgfile);	
+		return NULL;
+	}
+	SOHandle=dlopen(data_lib, RTLD_LAZY);
+	if((dlmsg=dlerror()) != NULL) {
+		php_error(E_ERROR, "DL Error: %s", dlmsg);
+        	return NULL;
+    	}	
+    	free(data_lib);
+    	return SOHandle;
+}
+
+void * bartlby_get_shm(char * cfgfile) {
+	char * shmtok;
+	void * bartlby_address;
+	int shm_id;
+	
+	shmtok = getConfigValue("shm_key", cfgfile);
+	if(shmtok == NULL) {
+		return NULL;	
+	}		
+	
+	
+	shm_id = shmget(ftok(shmtok, 32), 0,  0777);
+	free(shmtok);
+	if(shm_id != -1) {
+		bartlby_address=shmat(shm_id,NULL,0);
+		return bartlby_address;
+	} else {
+		
+		return NULL;
+	}
+}
 
 /* {{{ PHP_MINIT_FUNCTION
  */
@@ -214,6 +262,32 @@ PHP_FUNCTION(confirm_bartlby_compiled)
 	RETURN_STRINGL(string, len, 1);
 }
 
+PHP_FUNCTION(bartlby_version) {
+	RETURN_STRING(BARTLBY_VERSION,1);	
+	
+}
+
+PHP_FUNCTION(bartlby_config) {
+	pval * bartlby_config;
+	pval * bartlby_key;
+	char * k;
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &bartlby_config, &bartlby_key)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}	
+	
+	convert_to_string(bartlby_config);	
+	convert_to_string(bartlby_key);	
+	
+	k=getConfigValue(Z_STRVAL_P(bartlby_key), Z_STRVAL_P(bartlby_config));
+	if(k == NULL) {
+		
+		RETURN_FALSE;
+	} else {
+		RETURN_STRING(k,1);	
+	}
+	
+	
+}
 
 PHP_FUNCTION(bartlby_get_info) {
 	
@@ -228,29 +302,18 @@ PHP_FUNCTION(bartlby_get_info) {
 	pval * bartlby_config;
 	pval * bartlby_service_id;
 	
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &bartlby_config, &bartlby_service_id)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &bartlby_config)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}	
-	convert_to_long(bartlby_service_id);
+	
 	convert_to_string(bartlby_config);
 	
 	if (array_init(return_value) == FAILURE) {
 		RETURN_FALSE;
 	}
 	
-	shmtok = getConfigValue("shm_key", Z_STRVAL_P(bartlby_config));
-	if(shmtok == NULL) {
-		php_error(E_WARNING, "unset bartlbyconfig var shm_key");	
-		RETURN_FALSE;
-	}
-	
-	
-	
-	
-	shm_id = shmget(ftok(shmtok, 32), 0,  0777);
-	
-	if(shm_id != -1) {
-		bartlby_address=shmat(shm_id,NULL,0);
+	bartlby_address=bartlby_get_shm(Z_STRVAL_P(bartlby_config));
+	if(bartlby_address != NULL) {
 		shm_hdr=(struct shm_header *)(void *)bartlby_address;
 		
 		add_assoc_long(return_value, "services", shm_hdr->svccount);
@@ -260,12 +323,230 @@ PHP_FUNCTION(bartlby_get_info) {
 	
 	} else {
 		php_error(E_WARNING, "SHM segment is not existing (bartlby running?)");	
-		free(shmtok);
+		
 		RETURN_FALSE;
 	}
-	free(shmtok);
+	
 	
 }
+
+PHP_FUNCTION(bartlby_delete_server) {
+	
+	pval * bartlby_config;
+	pval * server_id;
+	
+	void * SOHandle;
+	char * dlmsg;
+	
+	int ret;
+	
+	int (*DeleteServer)(int, char*);
+	
+	struct service svc;
+	
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &bartlby_config,&server_id)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string(bartlby_config);
+	
+	convert_to_long(server_id);
+	
+	SOHandle=bartlby_get_sohandle(Z_STRVAL_P(bartlby_config));
+	if(SOHandle == NULL) {
+		php_error(E_WARNING, "bartlby SO error");	
+		RETURN_FALSE;	
+	}
+	
+	
+	LOAD_SYMBOL(DeleteServer,SOHandle, "DeleteServer");
+	
+	
+	
+	ret=DeleteServer(Z_LVAL_P(server_id),Z_STRVAL_P(bartlby_config));
+	
+	dlclose(SOHandle);
+	RETURN_LONG(ret);
+}
+
+PHP_FUNCTION(bartlby_add_server) {
+	
+	pval * bartlby_config;
+	pval * server_name;
+	pval * server_ip;
+	pval * server_port;
+	void * SOHandle;
+	char * dlmsg;
+	
+	int ret;
+	
+	int (*AddServer)(struct service *,char *);
+	
+	struct service svc;
+	
+	if (ZEND_NUM_ARGS() != 4 || getParameters(ht, 4, &bartlby_config,&server_name, &server_ip, &server_port)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string(bartlby_config);
+	convert_to_string(server_name);
+	convert_to_string(server_ip);
+	convert_to_long(server_port);
+	
+	SOHandle=bartlby_get_sohandle(Z_STRVAL_P(bartlby_config));
+	if(SOHandle == NULL) {
+		php_error(E_WARNING, "bartlby SO error");	
+		RETURN_FALSE;	
+	}
+	
+	
+	LOAD_SYMBOL(AddServer,SOHandle, "AddServer");
+	
+	strcpy(svc.server_name, Z_STRVAL_P(server_name));
+	svc.client_port=Z_LVAL_P(server_port);
+	strcpy(svc.client_ip, Z_STRVAL_P(server_ip));
+	
+	ret=AddServer(&svc, Z_STRVAL_P(bartlby_config));
+	
+	dlclose(SOHandle);
+	RETURN_LONG(ret);
+}
+
+PHP_FUNCTION(bartlby_modify_server) {
+	
+	pval * bartlby_config;
+	pval * server_name;
+	pval * server_ip;
+	pval * server_port;
+	pval * server_id;
+	
+	void * SOHandle;
+	char * dlmsg;
+	
+	int ret;
+	
+	int (*ModifyServer)(struct service *,char *);
+	
+	struct service svc;
+	
+	if (ZEND_NUM_ARGS() != 5 || getParameters(ht, 5, &bartlby_config,&server_id, &server_name, &server_ip, &server_port)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string(bartlby_config);
+	convert_to_string(server_name);
+	convert_to_string(server_ip);
+	convert_to_long(server_port);
+	convert_to_long(server_id);
+	
+	SOHandle=bartlby_get_sohandle(Z_STRVAL_P(bartlby_config));
+	if(SOHandle == NULL) {
+		php_error(E_WARNING, "bartlby SO error");	
+		RETURN_FALSE;	
+	}
+	
+	
+	LOAD_SYMBOL(ModifyServer,SOHandle, "ModifyServer");
+	
+	strcpy(svc.server_name, Z_STRVAL_P(server_name));
+	svc.client_port=Z_LVAL_P(server_port);
+	svc.server_id=Z_LVAL_P(server_id);
+	strcpy(svc.client_ip, Z_STRVAL_P(server_ip));
+	
+	ret=ModifyServer(&svc, Z_STRVAL_P(bartlby_config));
+	
+	dlclose(SOHandle);
+	RETURN_LONG(ret);
+}
+
+PHP_FUNCTION(bartlby_get_server_by_id) {
+	pval * bartlby_config;
+	
+	pval * server_id;
+	
+	void * SOHandle;
+	char * dlmsg;
+	
+	int ret;
+	
+	struct service * (*GetServerById)(int,struct service *, char *);
+	
+	struct service  svc;
+	
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &bartlby_config,&server_id)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string(bartlby_config);
+	
+	convert_to_long(server_id);
+	
+	SOHandle=bartlby_get_sohandle(Z_STRVAL_P(bartlby_config));
+	if(SOHandle == NULL) {
+		php_error(E_WARNING, "bartlby SO error");	
+		RETURN_FALSE;	
+	}
+	
+	
+	LOAD_SYMBOL(GetServerById,SOHandle, "GetServerById");
+	
+	GetServerById(Z_LVAL_P(server_id),&svc, Z_STRVAL_P(bartlby_config));
+	if(svc.server_name == NULL) {
+		RETURN_FALSE;	
+	} else {
+		if (array_init(return_value) == FAILURE) {
+			RETURN_FALSE;
+		}
+		add_assoc_string(return_value, "server_name", svc.server_name, 1);
+		add_assoc_string(return_value, "server_ip", svc.client_ip, 1);
+		add_assoc_long(return_value, "server_port",svc.client_port);
+			
+	}
+	dlclose(SOHandle);
+		
+}
+
+PHP_FUNCTION(bartlby_lib_info) {
+	char * dlmsg;
+	void * SOHandle;
+	char * data_lib;
+	pval * bartlby_config;
+	
+	char * (*GetAutor)();
+	char * (*GetVersion)();
+	char * (*GetName)();
+	char * GetAutorStr;
+	char * GetVersionStr;
+	char * GetNameStr;
+	
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &bartlby_config)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}	
+	convert_to_string(bartlby_config);
+	
+	SOHandle=bartlby_get_sohandle(Z_STRVAL_P(bartlby_config));
+	if(SOHandle == NULL) {
+		php_error(E_WARNING, "bartlby SO error");	
+		RETURN_FALSE;	
+	}
+	LOAD_SYMBOL(GetAutor,SOHandle, "GetAutor");
+    	LOAD_SYMBOL(GetVersion,SOHandle, "GetVersion");
+    	LOAD_SYMBOL(GetName,SOHandle, "GetName");
+    	
+	GetAutorStr=GetAutor();
+    	GetVersionStr=GetVersion();
+    	GetNameStr=GetName();
+    	
+    	if (array_init(return_value) == FAILURE) {
+		RETURN_FALSE;
+	}
+	add_assoc_string(return_value, "Autor", GetAutorStr, 1);
+	add_assoc_string(return_value, "Version", GetVersionStr, 1);
+	add_assoc_string(return_value, "Name", GetNameStr, 1);
+	
+	free(GetAutorStr);
+	free(GetVersionStr);
+	free(GetNameStr);
+	dlclose(SOHandle);
+    	
+}
+
 PHP_FUNCTION(bartlby_get_service) {
 	
 	char * shmtok;
@@ -289,19 +570,12 @@ PHP_FUNCTION(bartlby_get_service) {
 		RETURN_FALSE;
 	}
 	
-	shmtok = getConfigValue("shm_key", Z_STRVAL_P(bartlby_config));
-	if(shmtok == NULL) {
-		php_error(E_WARNING, "unset bartlbyconfig var shm_key");	
-		RETURN_FALSE;
-	}
+		
 	
 	
 	
-	
-	shm_id = shmget(ftok(shmtok, 32), 0,  0777);
-	
-	if(shm_id != -1) {
-		bartlby_address=shmat(shm_id,NULL,0);
+	bartlby_address=bartlby_get_shm(Z_STRVAL_P(bartlby_config));
+	if(bartlby_address != NULL) {
 		shm_hdr=(struct shm_header *)(void *)bartlby_address;
 		svcmap=(struct service *)(void *)bartlby_address+sizeof(struct shm_header);
 		if(Z_LVAL_P(bartlby_service_id) > shm_hdr->svccount-1) {
@@ -375,7 +649,7 @@ PHP_FUNCTION(bartlby_get_service) {
 		free(shmtok);
 		RETURN_FALSE;
 	}
-	free(shmtok);
+	
 	
 }
 
@@ -401,19 +675,8 @@ PHP_FUNCTION(bartlby_get_worker) {
 		RETURN_FALSE;
 	}
 	
-	shmtok = getConfigValue("shm_key", Z_STRVAL_P(bartlby_config));
-	if(shmtok == NULL) {
-		php_error(E_WARNING, "unset bartlbyconfig var shm_key");	
-		RETURN_FALSE;
-	}
-	
-	
-	
-	
-	shm_id = shmget(ftok(shmtok, 32), 0,  0777);
-	
-	if(shm_id != -1) {
-		bartlby_address=shmat(shm_id,NULL,0);
+	bartlby_address=bartlby_get_shm(Z_STRVAL_P(bartlby_config));
+	if(bartlby_address != NULL) {
 		shm_hdr=(struct shm_header *)(void *)bartlby_address;
 		svcmap=(struct service *)(void *)bartlby_address+sizeof(struct shm_header);
 		wrkmap=(struct worker *)(void*)&svcmap[shm_hdr->svccount]+20;
@@ -453,7 +716,7 @@ PHP_FUNCTION(bartlby_get_worker) {
 		free(shmtok);
 		RETURN_FALSE;
 	}
-	free(shmtok);
+	
 }
 
 /* }}} */
