@@ -64,6 +64,13 @@ PHP_FUNCTION(bartlby_delete_server);
 PHP_FUNCTION(bartlby_modify_server);
 PHP_FUNCTION(bartlby_get_server_by_id);
 
+
+
+PHP_FUNCTION(bartlby_add_service);
+PHP_FUNCTION(bartlby_delete_service);
+PHP_FUNCTION(bartlby_modify_service);
+PHP_FUNCTION(bartlby_get_service_by_id);
+
 /* 
   	Declare any global variables you may need between the BEGIN
 	and END macros here:     

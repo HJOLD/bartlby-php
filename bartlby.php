@@ -55,4 +55,26 @@ var_dump($get_server);
 $del_server=bartlby_delete_server($cfgfile,$add_server);
 echo "bartlby_delete_server()\n";
 var_dump($del_server);
+
+
+//&bartlby_config, &server_id, &plugin,&service_name,&plugin_arguments,&notify_enabled,&hour_from,&hour_to,&min_from,
+//&min_to,&check_interval, &service_type,&service_var,&service_passive_timeout
+$add_service=bartlby_add_service($cfgfile, 1, "testplg", "svcname", "plgargs", 1, 10,11,12,13,200,0,"VAR|Var1", 20);
+echo "bartlby_add_service()\n";
+var_dump($add_service);
+
+$mod_service=bartlby_modify_service($cfgfile,$add_service, 1, "UPPPtestplg", "UPPsvcname", "plgargs", 1, 10,11,12,13,200,0,"VAR|Var1", 20);
+echo "bartlby_modify_server()\n";
+var_dump($mod_service);
+
+
+$get_service=bartlby_get_service_by_id($cfgfile, $add_service);
+echo "bartlby_get_service_by_id()\n";
+var_dump($get_service);
+
+$del_service=bartlby_delete_service($cfgfile, $add_service);
+echo "bartlby_delete_service()\n";
+var_dump($del_service);
+
+
 ?>
