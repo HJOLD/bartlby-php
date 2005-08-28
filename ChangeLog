@@ -1,0 +1,32 @@
+2005-08-28 17:47  hjanuschka
+
+	* bartlby.c, bartlby.php, config.m4, php_bartlby.h:
+	  new functions added	      bartlby_version -> Version of PHP
+	  module	 bartlby_get_info -> SVC, WRK count, current
+	  running processes (in core)	      bartlby_get_service -> get
+	  SVC from SHM	       bartlby_get_worker -> get WRK from SHM
+	  bartlby_config -> get bartlby config variable
+	  bartlby_lib_info -> Version,Autor,Name of the data_library
+	  bartlby_add_server -> add a server , with usage of data_library
+		 bartlby_modify_server -> modifie a server
+	  bartlby_get_server_by_id -> get server by id using data_library
+		bartlby_delete_server -> delete server using data_library
+
+2005-08-28 03:17  hjanuschka
+
+	* bartlby.c, php_bartlby.h: notify_levels rollup
+
+2005-08-28 01:42  hjanuschka
+
+	* bartlby.c: [no log message]
+
+2005-08-28 01:39  hjanuschka
+
+	* .cvsignore, config.m4, CREDITS, EXPERIMENTAL, INSTALL, bartlby.c,
+	  bartlby.php, php_bartlby.h: Initial revision
+
+2005-08-28 01:39  hjanuschka
+
+	* .cvsignore, config.m4, CREDITS, EXPERIMENTAL, INSTALL, bartlby.c,
+	  bartlby.php, php_bartlby.h: initial
+
