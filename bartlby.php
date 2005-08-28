@@ -47,10 +47,10 @@ echo "bartlby_modify_server()\n";
 var_dump($mod_server);
 
 
-$get_server=bartlby_get_server_by_id($cfgfile, $add_server);
+/*$get_server=bartlby_get_server_by_id($cfgfile, $add_server);
 echo "bartlby_get_server_by_id()\n";
 var_dump($get_server);
-
+*/
 
 $del_server=bartlby_delete_server($cfgfile,$add_server);
 echo "bartlby_delete_server()\n";

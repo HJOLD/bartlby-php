@@ -1,3 +1,9 @@
+2005-08-28 19:45  hjanuschka
+
+	* ChangeLog, bartlby.c, bartlby.php, php_bartlby.h: added:
+	  bartlby_add_service	  bartlby_modify_service
+	  bartlby_get_service_by_id	  bartlby_delete_service
+
 2005-08-28 17:49  hjanuschka
 
 	* ChangeLog, Makefile: [no log message]

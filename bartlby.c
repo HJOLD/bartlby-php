@@ -185,7 +185,7 @@ void * bartlby_get_shm(char * cfgfile) {
 		bartlby_address=shmat(shm_id,NULL,0);
 		return bartlby_address;
 	} else {
-		
+		printf("EEEER");
 		return NULL;
 	}
 }
@@ -326,6 +326,8 @@ PHP_FUNCTION(bartlby_get_info) {
 		add_assoc_long(return_value, "services", shm_hdr->svccount);
 		add_assoc_long(return_value, "workers", shm_hdr->wrkcount);
 		add_assoc_long(return_value, "current_running", shm_hdr->current_running);
+		//add_assoc_long(return_value, "version", shm_hdr->version);
+		add_assoc_string(return_value, "version", shm_hdr->version, 1);
 		shmdt(bartlby_address);
 	
 	} else {
@@ -375,7 +377,7 @@ PHP_FUNCTION(bartlby_delete_server) {
 	RETURN_LONG(ret);
 }
 PHP_FUNCTION(bartlby_get_service_by_id) {
-		pval * bartlby_config;
+	pval * bartlby_config;
 	
 	pval * service_id;
 	
@@ -408,10 +410,11 @@ PHP_FUNCTION(bartlby_get_service_by_id) {
 	if(svc.server_name == NULL) {
 		RETURN_FALSE;	
 	} else {
+		
 		if (array_init(return_value) == FAILURE) {
 			RETURN_FALSE;
 		}
-		add_assoc_long(return_value, "server_id", svc.service_id);
+		add_assoc_long(return_value, "server_id", svc.server_id);
 		add_assoc_long(return_value, "last_state", svc.last_state);
 		add_assoc_long(return_value, "last_state", svc.current_state);
 		add_assoc_long(return_value, "client_port", svc.client_port);
@@ -850,15 +853,17 @@ PHP_FUNCTION(bartlby_get_service) {
 	
 	
 	
-	bartlby_address=bartlby_get_shm(Z_STRVAL_P(bartlby_config));
+	bartlby_address=bartlby_get_shm(Z_STRVAL_P(bartlby_config)); 
 	if(bartlby_address != NULL) {
 		shm_hdr=(struct shm_header *)(void *)bartlby_address;
 		svcmap=(struct service *)(void *)bartlby_address+sizeof(struct shm_header);
+		
+		
 		if(Z_LVAL_P(bartlby_service_id) > shm_hdr->svccount-1) {
 			php_error(E_WARNING, "Service id out of bounds");	
 			RETURN_FALSE;	
 		}
-		add_assoc_long(return_value, "server_id", svcmap[Z_LVAL_P(bartlby_service_id)].service_id);
+		add_assoc_long(return_value, "server_id", svcmap[Z_LVAL_P(bartlby_service_id)].server_id);
 		add_assoc_long(return_value, "last_state", svcmap[Z_LVAL_P(bartlby_service_id)].last_state);
 		add_assoc_long(return_value, "last_state", svcmap[Z_LVAL_P(bartlby_service_id)].current_state);
 		add_assoc_long(return_value, "client_port", svcmap[Z_LVAL_P(bartlby_service_id)].client_port);

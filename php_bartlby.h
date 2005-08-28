@@ -113,7 +113,7 @@ struct shm_header {
 	        int svccount;
 	        int wrkcount;
 	        int current_running;
-
+		char  version[50];
 
 };
 
