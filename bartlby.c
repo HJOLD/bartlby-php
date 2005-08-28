@@ -132,6 +132,7 @@ char * getConfigValue(char * key, char * fname) {
 								return NULL;
 						}
 						tok[strlen(tok)-1]='\0';
+						fclose(fp);
 						return strdup(tok);
 						
 				} else {
@@ -438,6 +439,7 @@ PHP_FUNCTION(bartlby_get_service_by_id) {
 		add_assoc_long(return_value, "last_notify_send", svc.last_notify_send);
 		add_assoc_long(return_value, "flap_count", svc.flap_count);
 		
+		add_assoc_long(return_value, "service_active", svc.service_active);
 		add_assoc_long(return_value, "service_type", svc.service_type);
 		add_assoc_long(return_value, "service_passive_timeout", svc.service_passive_timeout);
 		
@@ -887,6 +889,8 @@ PHP_FUNCTION(bartlby_get_service) {
 		add_assoc_long(return_value, "last_notify_send", svcmap[Z_LVAL_P(bartlby_service_id)].last_notify_send);
 		add_assoc_long(return_value, "flap_count", svcmap[Z_LVAL_P(bartlby_service_id)].flap_count);
 		
+		
+		add_assoc_long(return_value, "service_active", svcmap[Z_LVAL_P(bartlby_service_id)].service_active);
 		add_assoc_long(return_value, "service_type", svcmap[Z_LVAL_P(bartlby_service_id)].service_type);
 		add_assoc_long(return_value, "service_passive_timeout", svcmap[Z_LVAL_P(bartlby_service_id)].service_passive_timeout);
 		
