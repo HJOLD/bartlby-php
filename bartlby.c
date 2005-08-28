@@ -432,6 +432,7 @@ PHP_FUNCTION(bartlby_get_worker) {
 		add_assoc_long(return_value, "mail_notify", wrkmap[Z_LVAL_P(bartlby_worker_id)].mail_notify);
 		add_assoc_long(return_value, "escalation_count", wrkmap[Z_LVAL_P(bartlby_worker_id)].escalation_count);
 		add_assoc_long(return_value, "escalation_time", wrkmap[Z_LVAL_P(bartlby_worker_id)].escalation_time);
+		add_assoc_string(return_value, "notify_levels", wrkmap[Z_LVAL_P(bartlby_worker_id)].notify_levels,1);
 		shmdt(bartlby_address);
 		
 	/*	

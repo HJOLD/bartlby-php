@@ -140,6 +140,7 @@ struct worker {
 	int mail_notify;
 	int escalation_count;
 	int escalation_time;
+	char notify_levels[20];
 	char t[500];
 
 }sa;
