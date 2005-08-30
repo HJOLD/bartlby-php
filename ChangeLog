@@ -1,3 +1,12 @@
+2005-08-30 21:30  hjanuschka
+
+	* bartlby.c: [no log message]
+
+2005-08-30 20:48  hjanuschka
+
+	* ChangeLog, bartlby.c: service_id is now returned to php in
+	  get_service funcs
+
 2005-08-29 00:56  hjanuschka
 
 	* ChangeLog, bartlby.c, php_bartlby.h: updateded struct service
