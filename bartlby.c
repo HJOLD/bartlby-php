@@ -415,6 +415,7 @@ PHP_FUNCTION(bartlby_get_service_by_id) {
 		if (array_init(return_value) == FAILURE) {
 			RETURN_FALSE;
 		}
+		add_assoc_long(return_value, "service_id", svc.service_id);
 		add_assoc_long(return_value, "server_id", svc.server_id);
 		add_assoc_long(return_value, "last_state", svc.last_state);
 		add_assoc_long(return_value, "last_state", svc.current_state);
@@ -865,6 +866,7 @@ PHP_FUNCTION(bartlby_get_service) {
 			php_error(E_WARNING, "Service id out of bounds");	
 			RETURN_FALSE;	
 		}
+		add_assoc_long(return_value, "service_id", svcmap[Z_LVAL_P(bartlby_service_id)].service_id);
 		add_assoc_long(return_value, "server_id", svcmap[Z_LVAL_P(bartlby_service_id)].server_id);
 		add_assoc_long(return_value, "last_state", svcmap[Z_LVAL_P(bartlby_service_id)].last_state);
 		add_assoc_long(return_value, "last_state", svcmap[Z_LVAL_P(bartlby_service_id)].current_state);
