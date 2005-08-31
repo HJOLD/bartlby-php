@@ -616,10 +616,14 @@ PHP_FUNCTION(bartlby_add_service) {
 	convert_to_long(service_passive_timeout);
 	convert_to_string(service_var);
 	
+	
 	sprintf(svc.plugin, "%s", Z_STRVAL_P(plugin));
 	sprintf(svc.service_name, "%s", Z_STRVAL_P(service_name));
 	sprintf(svc.plugin_arguments, "%s", Z_STRVAL_P(plugin_arguments));
 	svc.notify_enabled=Z_LVAL_P(notify_enabled);
+	
+	
+	svc.server_id=Z_LVAL_P(server_id);
 	
 	svc.hour_from=Z_LVAL_P(hour_from);
 	svc.hour_to=Z_LVAL_P(hour_to);
