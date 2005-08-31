@@ -769,6 +769,7 @@ PHP_FUNCTION(bartlby_get_server_by_id) {
 	LOAD_SYMBOL(GetServerById,SOHandle, "GetServerById");
 	
 	GetServerById(Z_LVAL_P(server_id),&svc, Z_STRVAL_P(bartlby_config));
+	
 	if(svc.server_name == NULL) {
 		RETURN_FALSE;	
 	} else {
