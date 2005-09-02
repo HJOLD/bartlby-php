@@ -76,5 +76,8 @@ $del_service=bartlby_delete_service($cfgfile, $add_service);
 echo "bartlby_delete_service()\n";
 var_dump($del_service);
 
+bartlby_modify_service("/storage/SF.NET/BARTLBY/bartlby-core/bartlby.cfg", 411759 , 171, "INIT","Initial Check","-h",1, 0, 24, 0,59, 2000,3,"", 200);
 
+$v=bartlby_get_service_by_id($cfgfile, 411759);
+var_dump($v);
 ?>

@@ -1,3 +1,7 @@
+2005-09-02 04:18  hjanuschka
+
+	* ChangeLog, bartlby.c: add_service -> convert_to_long(server_id)
+
 2005-08-31 22:07  hjanuschka
 
 	* bartlby.c: tested compatibility to php5 (it works ;))

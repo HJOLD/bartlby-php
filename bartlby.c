@@ -525,10 +525,11 @@ PHP_FUNCTION(bartlby_modify_service) {
 	convert_to_string(plugin_arguments);
 	convert_to_long(notify_enabled);
 	convert_to_long(service_id);
-
+	convert_to_long(server_id);
+	
 	convert_to_long(hour_from);
 	convert_to_long(hour_to);
-	convert_to_long(hour_from);
+	convert_to_long(min_from);
 	convert_to_long(min_to);
 	convert_to_long(check_interval);
 	convert_to_long(service_type);
@@ -545,6 +546,7 @@ PHP_FUNCTION(bartlby_modify_service) {
 	svc.hour_to=Z_LVAL_P(hour_to);
 	svc.min_from=Z_LVAL_P(min_from);
 	svc.min_to=Z_LVAL_P(min_to);
+	svc.server_id=Z_LVAL_P(server_id);
 	
 	svc.check_interval=Z_LVAL_P(check_interval);
 	svc.service_type=Z_LVAL_P(service_type);
@@ -609,7 +611,7 @@ PHP_FUNCTION(bartlby_add_service) {
 	convert_to_long(notify_enabled);
 	convert_to_long(hour_from);
 	convert_to_long(hour_to);
-	convert_to_long(hour_from);
+	convert_to_long(min_from);
 	convert_to_long(min_to);
 	convert_to_long(check_interval);
 	convert_to_long(service_type);
