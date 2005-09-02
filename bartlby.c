@@ -614,6 +614,7 @@ PHP_FUNCTION(bartlby_add_service) {
 	convert_to_long(check_interval);
 	convert_to_long(service_type);
 	convert_to_long(service_passive_timeout);
+	convert_to_long(server_id);
 	convert_to_string(service_var);
 	
 	
@@ -625,10 +626,14 @@ PHP_FUNCTION(bartlby_add_service) {
 	
 	svc.server_id=Z_LVAL_P(server_id);
 	
+	
+	
 	svc.hour_from=Z_LVAL_P(hour_from);
 	svc.hour_to=Z_LVAL_P(hour_to);
 	svc.min_from=Z_LVAL_P(min_from);
 	svc.min_to=Z_LVAL_P(min_to);
+	
+	
 	
 	svc.check_interval=Z_LVAL_P(check_interval);
 	svc.service_type=Z_LVAL_P(service_type);
@@ -734,6 +739,7 @@ PHP_FUNCTION(bartlby_modify_server) {
 	strcpy(svc.server_name, Z_STRVAL_P(server_name));
 	svc.client_port=Z_LVAL_P(server_port);
 	svc.server_id=Z_LVAL_P(server_id);
+	
 	strcpy(svc.client_ip, Z_STRVAL_P(server_ip));
 	
 	ret=ModifyServer(&svc, Z_STRVAL_P(bartlby_config));

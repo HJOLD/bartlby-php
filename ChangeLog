@@ -1,3 +1,14 @@
+2005-08-31 22:07  hjanuschka
+
+	* bartlby.c: tested compatibility to php5 (it works ;))
+	  bartlby_modify_server -> server_id wasnt set into struct service
+	  * svc
+
+2005-08-31 21:00  hjanuschka
+
+	* ChangeLog, bartlby.c, bartlby.php: get_server_by_id works again
+	  *fg* damn
+
 2005-08-30 22:13  hjanuschka
 
 	* ChangeLog: [no log message]
