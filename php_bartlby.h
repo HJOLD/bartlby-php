@@ -71,6 +71,12 @@ PHP_FUNCTION(bartlby_delete_service);
 PHP_FUNCTION(bartlby_modify_service);
 PHP_FUNCTION(bartlby_get_service_by_id);
 
+
+PHP_FUNCTION(bartlby_add_worker);
+PHP_FUNCTION(bartlby_delete_worker);
+PHP_FUNCTION(bartlby_modify_worker);
+PHP_FUNCTION(bartlby_get_worker_by_id);
+
 /* 
   	Declare any global variables you may need between the BEGIN
 	and END macros here:     
@@ -153,12 +159,13 @@ struct service {
 };
 
 struct worker {
-	
+	char name[2048];
 	char  mail[2048];
 	char  icq[2048];
 	char  services[2048];
 	
-	
+	int worker_id;
+	int active;
 	int icq_notify;
 	int mail_notify;
 	int escalation_count;

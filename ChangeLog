@@ -1,3 +1,7 @@
+2005-09-03 00:46  hjanuschka
+
+	* ChangeLog, bartlby.c, bartlby.php: server_modify fixes
+
 2005-09-02 04:18  hjanuschka
 
 	* ChangeLog, bartlby.c: add_service -> convert_to_long(server_id)

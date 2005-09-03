@@ -60,6 +60,13 @@ function_entry bartlby_functions[] = {
 	PHP_FE(bartlby_delete_service,NULL)
 	PHP_FE(bartlby_modify_service,NULL)
 	PHP_FE(bartlby_get_service_by_id,NULL)
+	
+	PHP_FE(bartlby_add_worker, NULL)
+	PHP_FE(bartlby_delete_worker, NULL)
+	PHP_FE(bartlby_modify_worker, NULL)
+	PHP_FE(bartlby_get_worker_by_id, NULL)
+	
+	
 	{NULL, NULL, NULL}	/* Must be the last line in bartlby_functions[] */
 };
 /* }}} */
@@ -273,6 +280,203 @@ PHP_FUNCTION(confirm_bartlby_compiled)
 PHP_FUNCTION(bartlby_version) {
 	RETURN_STRING(BARTLBY_VERSION,1);	
 	
+}
+PHP_FUNCTION(bartlby_add_worker) {
+	//svc->mail, svc->icq, svc->services, svc->notify_levels, svc->active, svc->name
+	pval * bartlby_config;
+	pval * mail;
+	pval * icq;
+	pval * services;
+	pval * notify_levels;
+	pval * active;
+	pval * name;
+	
+	void * SOHandle;
+	char * dlmsg;
+	
+	int ret;
+	
+	int (*AddWorker)(struct worker *,char *);
+	
+	struct worker svc;
+	
+	if (ZEND_NUM_ARGS() != 7 || getParameters(ht, 7, &bartlby_config,&mail, &icq, &services, &notify_levels, &active, &name)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string(bartlby_config);
+	convert_to_string(mail);
+	convert_to_string(icq);
+	convert_to_string(services);
+	convert_to_string(notify_levels);
+	convert_to_string(name);
+	convert_to_long(active);
+	
+	SOHandle=bartlby_get_sohandle(Z_STRVAL_P(bartlby_config));
+	if(SOHandle == NULL) {
+		php_error(E_WARNING, "bartlby SO error");	
+		RETURN_FALSE;	
+	}
+	
+	
+	LOAD_SYMBOL(AddWorker,SOHandle, "AddWorker");
+	
+	strcpy(svc.name, Z_STRVAL_P(name));
+	strcpy(svc.mail, Z_STRVAL_P(mail));
+	strcpy(svc.icq, Z_STRVAL_P(icq));
+	strcpy(svc.services, Z_STRVAL_P(services));
+	strcpy(svc.notify_levels, Z_STRVAL_P(notify_levels));
+	svc.active=Z_LVAL_P(active);
+	
+	
+	ret=AddWorker(&svc, Z_STRVAL_P(bartlby_config));
+	
+	dlclose(SOHandle);
+	RETURN_LONG(ret);	
+}
+
+PHP_FUNCTION(bartlby_delete_worker) {
+	pval * bartlby_config;
+	pval * worker_id;
+	
+	void * SOHandle;
+	char * dlmsg;
+	
+	int ret;
+	
+	int (*DeleteWorker)(int, char*);
+	
+	struct service svc;
+	
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &bartlby_config,&worker_id)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string(bartlby_config);
+	
+	convert_to_long(worker_id);
+	
+	SOHandle=bartlby_get_sohandle(Z_STRVAL_P(bartlby_config));
+	if(SOHandle == NULL) {
+		php_error(E_WARNING, "bartlby SO error");	
+		RETURN_FALSE;	
+	}
+	
+	
+	LOAD_SYMBOL(DeleteWorker,SOHandle, "DeleteWorker");
+	
+	
+	
+	ret=DeleteWorker(Z_LVAL_P(worker_id),Z_STRVAL_P(bartlby_config));
+	
+	dlclose(SOHandle);
+	RETURN_LONG(ret);	
+}
+
+PHP_FUNCTION(bartlby_modify_worker) {
+	pval * bartlby_config;
+	pval * mail;
+	pval * icq;
+	pval * services;
+	pval * notify_levels;
+	pval * active;
+	pval * name;
+	pval * worker_id;
+	
+	void * SOHandle;
+	char * dlmsg;
+	
+	int ret;
+	
+	int (*UpdateWorker)(struct worker *,char *);
+	
+	struct worker svc;
+	
+	if (ZEND_NUM_ARGS() != 8 || getParameters(ht, 8, &bartlby_config,&worker_id, &mail, &icq, &services, &notify_levels, &active, &name)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string(bartlby_config);
+	convert_to_string(mail);
+	convert_to_string(icq);
+	convert_to_string(services);
+	convert_to_string(notify_levels);
+	convert_to_string(name);
+	convert_to_long(active);
+	convert_to_long(worker_id);
+	
+	SOHandle=bartlby_get_sohandle(Z_STRVAL_P(bartlby_config));
+	if(SOHandle == NULL) {
+		php_error(E_WARNING, "bartlby SO error");	
+		RETURN_FALSE;	
+	}
+	
+	
+	LOAD_SYMBOL(UpdateWorker,SOHandle, "UpdateWorker");
+	
+	strcpy(svc.name, Z_STRVAL_P(name));
+	strcpy(svc.mail, Z_STRVAL_P(mail));
+	strcpy(svc.icq, Z_STRVAL_P(icq));
+	strcpy(svc.services, Z_STRVAL_P(services));
+	strcpy(svc.notify_levels, Z_STRVAL_P(notify_levels));
+	svc.active=Z_LVAL_P(active);
+	svc.worker_id=Z_LVAL_P(worker_id);
+	
+	ret=UpdateWorker(&svc, Z_STRVAL_P(bartlby_config));
+	
+	dlclose(SOHandle);
+	RETURN_LONG(ret);		
+}
+
+PHP_FUNCTION(bartlby_get_worker_by_id) {
+		pval * bartlby_config;
+	
+	pval * worker_id;
+	
+	void * SOHandle;
+	char * dlmsg;
+	
+	int ret;
+	
+	int (*GetWorkerById)(int,struct worker *, char *);
+	
+	struct worker  svc;
+	
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &bartlby_config,&worker_id)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string(bartlby_config);
+	
+	convert_to_long(worker_id);
+	
+	SOHandle=bartlby_get_sohandle(Z_STRVAL_P(bartlby_config));
+	if(SOHandle == NULL) {
+		php_error(E_WARNING, "bartlby SO error");	
+		RETURN_FALSE;	
+	}
+	
+	
+	LOAD_SYMBOL(GetWorkerById,SOHandle, "GetWorkerById");
+	
+	GetWorkerById(Z_LVAL_P(worker_id),&svc, Z_STRVAL_P(bartlby_config));
+	
+	if(svc.name == NULL) {
+		RETURN_FALSE;	
+	} else {
+		if (array_init(return_value) == FAILURE) {
+			RETURN_FALSE;
+		}
+		add_assoc_string(return_value, "mail", svc.mail, 1);
+		add_assoc_string(return_value, "icq", svc.icq, 1);
+		add_assoc_string(return_value, "services", svc.services, 1);
+		
+		add_assoc_long(return_value, "icq_notify", svc.icq_notify);
+		add_assoc_long(return_value, "mail_notify", svc.mail_notify);
+		
+		add_assoc_string(return_value, "notify_levels", svc.notify_levels,1);
+		add_assoc_string(return_value, "name", svc.name,1);
+		add_assoc_long(return_value, "worker_id", svc.worker_id);
+			
+	}
+	dlclose(SOHandle);
+		
 }
 
 PHP_FUNCTION(bartlby_config) {
@@ -996,6 +1200,8 @@ PHP_FUNCTION(bartlby_get_worker) {
 		add_assoc_long(return_value, "escalation_count", wrkmap[Z_LVAL_P(bartlby_worker_id)].escalation_count);
 		add_assoc_long(return_value, "escalation_time", wrkmap[Z_LVAL_P(bartlby_worker_id)].escalation_time);
 		add_assoc_string(return_value, "notify_levels", wrkmap[Z_LVAL_P(bartlby_worker_id)].notify_levels,1);
+		add_assoc_string(return_value, "name", wrkmap[Z_LVAL_P(bartlby_worker_id)].name,1);
+		add_assoc_long(return_value, "worker_id", wrkmap[Z_LVAL_P(bartlby_worker_id)].worker_id);
 		shmdt(bartlby_address);
 		
 	/*	
