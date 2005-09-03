@@ -44,7 +44,7 @@ extern zend_module_entry bartlby_module_entry;
     	}
     	
 
-#define BARTLBY_VERSION "0.9.1"
+#define BARTLBY_VERSION "0.9.7"
 
 PHP_MINIT_FUNCTION(bartlby);
 PHP_MSHUTDOWN_FUNCTION(bartlby);
@@ -77,6 +77,10 @@ PHP_FUNCTION(bartlby_delete_worker);
 PHP_FUNCTION(bartlby_modify_worker);
 PHP_FUNCTION(bartlby_get_worker_by_id);
 
+PHP_FUNCTION(bartlby_reload);
+
+PHP_FUNCTION(bartlbe_toggle_service_notify);
+PHP_FUNCTION(bartlbe_toggle_service_active);
 /* 
   	Declare any global variables you may need between the BEGIN
 	and END macros here:     
@@ -120,6 +124,7 @@ struct shm_header {
 	        int wrkcount;
 	        int current_running;
 		char  version[50];
+		int do_reload;
 
 };
 
@@ -166,8 +171,9 @@ struct worker {
 	
 	int worker_id;
 	int active;
-	int icq_notify;
-	int mail_notify;
+	
+	char password[2048];
+	
 	int escalation_count;
 	int escalation_time;
 	char notify_levels[20];

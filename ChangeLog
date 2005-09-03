@@ -1,3 +1,9 @@
+2005-09-03 22:10  hjanuschka
+
+	* ChangeLog, bartlby.c, bartlby.php, php_bartlby.h: added:
+	  bartlby_add_worker, bartlby_delete_worker, bartlby_modify_worker,
+	  bartlby_get_worker_by_id struct worker updated (includes NAME)
+
 2005-09-03 00:46  hjanuschka
 
 	* ChangeLog, bartlby.c, bartlby.php: server_modify fixes

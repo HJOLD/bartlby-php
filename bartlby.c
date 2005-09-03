@@ -66,6 +66,11 @@ function_entry bartlby_functions[] = {
 	PHP_FE(bartlby_modify_worker, NULL)
 	PHP_FE(bartlby_get_worker_by_id, NULL)
 	
+	PHP_FE(bartlbe_toggle_service_notify, NULL)
+	PHP_FE(bartlbe_toggle_service_active, NULL)
+	
+	
+	PHP_FE(bartlby_reload, NULL)
 	
 	{NULL, NULL, NULL}	/* Must be the last line in bartlby_functions[] */
 };
@@ -174,7 +179,7 @@ void * bartlby_get_sohandle(char * cfgfile) {
     	}	
     	free(data_lib);
     	return SOHandle;
-}
+} 
 
 void * bartlby_get_shm(char * cfgfile) {
 	char * shmtok;
@@ -281,6 +286,156 @@ PHP_FUNCTION(bartlby_version) {
 	RETURN_STRING(BARTLBY_VERSION,1);	
 	
 }
+
+PHP_FUNCTION(bartlbe_toggle_service_active) {
+	pval * bartlby_config;
+	pval * bartlby_service_id;
+	char * shmtok;
+	int shm_id;
+	void * bartlby_address;
+	struct shm_header * shm_hdr;
+	int r;
+	
+	struct service * svcmap;	
+	
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &bartlby_config, &bartlby_service_id)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_long(bartlby_service_id);
+	convert_to_string(bartlby_config);
+	
+	if (array_init(return_value) == FAILURE) {
+		RETURN_FALSE;
+	}
+	
+		
+	
+	
+	
+	bartlby_address=bartlby_get_shm(Z_STRVAL_P(bartlby_config)); 
+	if(bartlby_address != NULL) {
+		shm_hdr=(struct shm_header *)(void *)bartlby_address;
+		svcmap=(struct service *)(void *)bartlby_address+sizeof(struct shm_header);
+		
+		
+		if(Z_LVAL_P(bartlby_service_id) > shm_hdr->svccount-1) {
+			php_error(E_WARNING, "Service id out of bounds");	
+			RETURN_FALSE;	
+		}
+		if(svcmap[Z_LVAL_P(bartlby_service_id)].service_active == 1) {
+			svcmap[Z_LVAL_P(bartlby_service_id)].service_active = 0;
+			r=0;
+		} else {
+			svcmap[Z_LVAL_P(bartlby_service_id)].service_active = 1;	
+			r=1;
+		}
+		shmdt(bartlby_address);
+		RETURN_LONG(r);
+		
+	
+	
+	} else {
+		php_error(E_WARNING, "SHM segment is not existing (bartlby running?)");	
+		free(shmtok);
+		RETURN_FALSE;
+	}	
+}
+
+PHP_FUNCTION(bartlbe_toggle_service_notify) {
+	pval * bartlby_config;
+	pval * bartlby_service_id;
+	char * shmtok;
+	int shm_id;
+	void * bartlby_address;
+	struct shm_header * shm_hdr;
+	int r;
+	struct service * svcmap; 
+	
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &bartlby_config, &bartlby_service_id)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_long(bartlby_service_id);
+	convert_to_string(bartlby_config);
+	
+	if (array_init(return_value) == FAILURE) {
+		RETURN_FALSE;
+	}
+	
+		
+	
+	
+	
+	bartlby_address=bartlby_get_shm(Z_STRVAL_P(bartlby_config)); 
+	if(bartlby_address != NULL) {
+		shm_hdr=(struct shm_header *)(void *)bartlby_address;
+		svcmap=(struct service *)(void *)bartlby_address+sizeof(struct shm_header);
+		
+		
+		if(Z_LVAL_P(bartlby_service_id) > shm_hdr->svccount-1) {
+			php_error(E_WARNING, "Service id out of bounds");	
+			RETURN_FALSE;	
+		}
+		if(svcmap[Z_LVAL_P(bartlby_service_id)].notify_enabled == 1) {
+			svcmap[Z_LVAL_P(bartlby_service_id)].notify_enabled = 0;
+			r=0;
+		} else {
+			svcmap[Z_LVAL_P(bartlby_service_id)].notify_enabled = 1;	
+			r=1;
+		}
+		shmdt(bartlby_address);
+		RETURN_LONG(r);
+		
+	
+	
+	} else {
+		php_error(E_WARNING, "SHM segment is not existing (bartlby running?)");	
+		free(shmtok);
+		RETURN_FALSE;
+	}	
+}
+
+PHP_FUNCTION(bartlby_reload) {
+	char * shmtok;
+	int shm_id;
+	void * bartlby_address;
+	struct shm_header * shm_hdr;
+	
+	
+	
+	pval * bartlby_config;
+	
+	
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &bartlby_config)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}	
+	
+	convert_to_string(bartlby_config);
+	
+	if (array_init(return_value) == FAILURE) {
+		RETURN_FALSE;
+	}
+	
+	bartlby_address=bartlby_get_shm(Z_STRVAL_P(bartlby_config));
+	if(bartlby_address != NULL) {
+		shm_hdr=(struct shm_header *)(void *)bartlby_address;
+		shm_hdr->do_reload=1;
+		
+		
+		
+		add_assoc_string(return_value, "reload", "OK", 1);
+		
+		shmdt(bartlby_address);
+		
+
+	
+	} else {
+		php_error(E_WARNING, "SHM segment is not existing (bartlby running?)");	
+		free(shmtok);
+		RETURN_FALSE;
+	}
+		
+	RETURN_TRUE;	
+}
 PHP_FUNCTION(bartlby_add_worker) {
 	//svc->mail, svc->icq, svc->services, svc->notify_levels, svc->active, svc->name
 	pval * bartlby_config;
@@ -290,6 +445,7 @@ PHP_FUNCTION(bartlby_add_worker) {
 	pval * notify_levels;
 	pval * active;
 	pval * name;
+	pval * password;
 	
 	void * SOHandle;
 	char * dlmsg;
@@ -300,12 +456,13 @@ PHP_FUNCTION(bartlby_add_worker) {
 	
 	struct worker svc;
 	
-	if (ZEND_NUM_ARGS() != 7 || getParameters(ht, 7, &bartlby_config,&mail, &icq, &services, &notify_levels, &active, &name)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 8 || getParameters(ht, 8, &bartlby_config,&mail, &icq, &services, &notify_levels, &active, &name, &password)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(bartlby_config);
 	convert_to_string(mail);
 	convert_to_string(icq);
+	convert_to_string(password);
 	convert_to_string(services);
 	convert_to_string(notify_levels);
 	convert_to_string(name);
@@ -320,6 +477,7 @@ PHP_FUNCTION(bartlby_add_worker) {
 	
 	LOAD_SYMBOL(AddWorker,SOHandle, "AddWorker");
 	
+	strcpy(svc.password, Z_STRVAL_P(password));
 	strcpy(svc.name, Z_STRVAL_P(name));
 	strcpy(svc.mail, Z_STRVAL_P(mail));
 	strcpy(svc.icq, Z_STRVAL_P(icq));
@@ -380,6 +538,7 @@ PHP_FUNCTION(bartlby_modify_worker) {
 	pval * active;
 	pval * name;
 	pval * worker_id;
+	pval * password;
 	
 	void * SOHandle;
 	char * dlmsg;
@@ -390,11 +549,12 @@ PHP_FUNCTION(bartlby_modify_worker) {
 	
 	struct worker svc;
 	
-	if (ZEND_NUM_ARGS() != 8 || getParameters(ht, 8, &bartlby_config,&worker_id, &mail, &icq, &services, &notify_levels, &active, &name)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 9 || getParameters(ht, 9, &bartlby_config,&worker_id, &mail, &icq, &services, &notify_levels, &active, &name, &password)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(bartlby_config);
 	convert_to_string(mail);
+	convert_to_string(password);
 	convert_to_string(icq);
 	convert_to_string(services);
 	convert_to_string(notify_levels);
@@ -411,6 +571,7 @@ PHP_FUNCTION(bartlby_modify_worker) {
 	
 	LOAD_SYMBOL(UpdateWorker,SOHandle, "UpdateWorker");
 	
+	strcpy(svc.password, Z_STRVAL_P(password));
 	strcpy(svc.name, Z_STRVAL_P(name));
 	strcpy(svc.mail, Z_STRVAL_P(mail));
 	strcpy(svc.icq, Z_STRVAL_P(icq));
@@ -422,6 +583,7 @@ PHP_FUNCTION(bartlby_modify_worker) {
 	ret=UpdateWorker(&svc, Z_STRVAL_P(bartlby_config));
 	
 	dlclose(SOHandle);
+	RETURN_STRING(Z_STRVAL_P(icq),1);
 	RETURN_LONG(ret);		
 }
 
@@ -467,12 +629,14 @@ PHP_FUNCTION(bartlby_get_worker_by_id) {
 		add_assoc_string(return_value, "icq", svc.icq, 1);
 		add_assoc_string(return_value, "services", svc.services, 1);
 		
-		add_assoc_long(return_value, "icq_notify", svc.icq_notify);
-		add_assoc_long(return_value, "mail_notify", svc.mail_notify);
+		
 		
 		add_assoc_string(return_value, "notify_levels", svc.notify_levels,1);
 		add_assoc_string(return_value, "name", svc.name,1);
+		add_assoc_string(return_value, "password", svc.password,1);
+		
 		add_assoc_long(return_value, "worker_id", svc.worker_id);
+		add_assoc_long(return_value, "active", svc.active);
 			
 	}
 	dlclose(SOHandle);
@@ -531,6 +695,7 @@ PHP_FUNCTION(bartlby_get_info) {
 		add_assoc_long(return_value, "services", shm_hdr->svccount);
 		add_assoc_long(return_value, "workers", shm_hdr->wrkcount);
 		add_assoc_long(return_value, "current_running", shm_hdr->current_running);
+		add_assoc_long(return_value, "do_reload", shm_hdr->do_reload);
 		//add_assoc_long(return_value, "version", shm_hdr->version);
 		add_assoc_string(return_value, "version", shm_hdr->version, 1);
 		shmdt(bartlby_address);
@@ -1195,12 +1360,9 @@ PHP_FUNCTION(bartlby_get_worker) {
 		add_assoc_string(return_value, "icq", wrkmap[Z_LVAL_P(bartlby_worker_id)].icq, 1);
 		add_assoc_string(return_value, "services", wrkmap[Z_LVAL_P(bartlby_worker_id)].services, 1);
 		
-		add_assoc_long(return_value, "icq_notify", wrkmap[Z_LVAL_P(bartlby_worker_id)].icq_notify);
-		add_assoc_long(return_value, "mail_notify", wrkmap[Z_LVAL_P(bartlby_worker_id)].mail_notify);
-		add_assoc_long(return_value, "escalation_count", wrkmap[Z_LVAL_P(bartlby_worker_id)].escalation_count);
-		add_assoc_long(return_value, "escalation_time", wrkmap[Z_LVAL_P(bartlby_worker_id)].escalation_time);
 		add_assoc_string(return_value, "notify_levels", wrkmap[Z_LVAL_P(bartlby_worker_id)].notify_levels,1);
 		add_assoc_string(return_value, "name", wrkmap[Z_LVAL_P(bartlby_worker_id)].name,1);
+		add_assoc_string(return_value, "password", wrkmap[Z_LVAL_P(bartlby_worker_id)].password,1);
 		add_assoc_long(return_value, "worker_id", wrkmap[Z_LVAL_P(bartlby_worker_id)].worker_id);
 		shmdt(bartlby_address);
 		
