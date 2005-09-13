@@ -1,3 +1,9 @@
+2005-09-04 01:02  hjanuschka
+
+	* ChangeLog, bartlby.c, bartlby.php, php_bartlby.h:
+	  bartlby_toggle_service_active bartlby_toggle_service_notify
+	  enable/disable notify/Service via UI
+
 2005-09-03 22:10  hjanuschka
 
 	* ChangeLog, bartlby.c, bartlby.php, php_bartlby.h: added:

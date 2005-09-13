@@ -25,7 +25,7 @@ echo "bartlby_get_service()\n";
 var_dump($svc);
 
 
-$wrk=bartlby_get_worker($cfgfile, 1);
+$wrk=bartlby_get_worker($cfgfile, 0);
 echo "bartlby_get_worker()\n";
 var_dump($wrk);
 
