@@ -125,6 +125,7 @@ struct shm_header {
 	        int current_running;
 		char  version[50];
 		int do_reload;
+		int last_replication;
 
 };
 

@@ -698,6 +698,7 @@ PHP_FUNCTION(bartlby_get_info) {
 		add_assoc_long(return_value, "do_reload", shm_hdr->do_reload);
 		//add_assoc_long(return_value, "version", shm_hdr->version);
 		add_assoc_string(return_value, "version", shm_hdr->version, 1);
+		add_assoc_long(return_value, "last_replication", shm_hdr->last_replication);
 		shmdt(bartlby_address);
 	
 	} else {

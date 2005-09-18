@@ -1,3 +1,8 @@
+2005-09-13 21:26  hjanuschka
+
+	* ChangeLog, bartlby.php: compile test ;-) _MALLOC_CHECK=2 verified
+	  ;-)
+
 2005-09-04 01:02  hjanuschka
 
 	* ChangeLog, bartlby.c, bartlby.php, php_bartlby.h:
