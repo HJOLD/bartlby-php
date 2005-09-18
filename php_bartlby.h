@@ -44,7 +44,7 @@ extern zend_module_entry bartlby_module_entry;
     	}
     	
 
-#define BARTLBY_VERSION "0.9.7"
+#define BARTLBY_VERSION "0.9.8"
 
 PHP_MINIT_FUNCTION(bartlby);
 PHP_MSHUTDOWN_FUNCTION(bartlby);

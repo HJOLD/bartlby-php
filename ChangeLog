@@ -1,3 +1,8 @@
+2005-09-18 07:04  hjanuschka
+
+	* ChangeLog, bartlby.c, config.m4, php_bartlby.h: replication
+	  roll-up
+
 2005-09-13 21:26  hjanuschka
 
 	* ChangeLog, bartlby.php: compile test ;-) _MALLOC_CHECK=2 verified
