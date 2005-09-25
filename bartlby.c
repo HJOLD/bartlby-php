@@ -143,7 +143,9 @@ char * getConfigValue(char * key, char * fname) {
 						if(tok == NULL) {
 								return NULL;
 						}
-						tok[strlen(tok)-1]='\0';
+						if(tok[strlen(tok)-1] == '\r') {
+							tok[strlen(tok)-1]='\0';
+						}
 						fclose(fp);
 						return strdup(tok);
 						
