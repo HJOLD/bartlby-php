@@ -1,3 +1,7 @@
+2005-09-25 15:31  hjanuschka
+
+	* ChangeLog, bartlby.c: \r getConfig bug fixed
+
 2005-09-18 13:28  hjanuschka
 
 	* ChangeLog, php_bartlby.h: version bump
