@@ -56,6 +56,10 @@ function_entry bartlby_functions[] = {
 	PHP_FE(bartlby_get_server_by_id,NULL)
 	
 	
+	PHP_FE(bartlby_encode,NULL)
+	PHP_FE(bartlby_decode,NULL)
+	
+	
 	PHP_FE(bartlby_add_service,NULL)
 	PHP_FE(bartlby_delete_service,NULL)
 	PHP_FE(bartlby_modify_service,NULL)
@@ -121,6 +125,22 @@ static void php_bartlby_init_globals(zend_bartlby_globals *bartlby_globals)
 */
 /* }}} */
 
+void xbartlby_decode(char * msg, int length) {
+	int x;
+		
+	for(x=0; x<length; x++) {
+		msg[x]=2^msg[x];	
+		
+	}
+	
+}
+void xbartlby_encode(char * msg, int length) {
+	int x;
+	for(x=0; x<length; x++) {
+		msg[x]=msg[x]^2;	
+	}
+	
+}
 
 char * getConfigValue(char * key, char * fname) {
 	FILE * fp;
@@ -394,6 +414,32 @@ PHP_FUNCTION(bartlbe_toggle_service_notify) {
 		free(shmtok);
 		RETURN_FALSE;
 	}	
+}
+
+PHP_FUNCTION(bartlby_encode) {
+	pval * instr;
+	
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &instr)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string(instr);
+	xbartlby_encode(Z_STRVAL_P(instr), strlen(Z_STRVAL_P(instr)));
+	
+	RETURN_STRING(Z_STRVAL_P(instr),1);
+	
+	
+}
+
+PHP_FUNCTION(bartlby_decode) {
+	pval * instr;
+	
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &instr)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string(instr);
+	xbartlby_decode(Z_STRVAL_P(instr), strlen(Z_STRVAL_P(instr)));
+	
+	RETURN_STRING(Z_STRVAL_P(instr),1);	
 }
 
 PHP_FUNCTION(bartlby_reload) {
@@ -708,6 +754,7 @@ PHP_FUNCTION(bartlby_get_info) {
 		//add_assoc_long(return_value, "version", shm_hdr->version);
 		add_assoc_string(return_value, "version", shm_hdr->version, 1);
 		add_assoc_long(return_value, "last_replication", shm_hdr->last_replication);
+		add_assoc_long(return_value, "startup_time", shm_hdr->startup_time);
 		shmdt(bartlby_address);
 	
 	} else {

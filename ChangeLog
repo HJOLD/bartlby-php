@@ -1,3 +1,8 @@
+2005-09-25 18:32  hjanuschka
+
+	* ChangeLog, bartlby.c, php_bartlby.h: add/modify worker -> enable
+	  disable trigger
+
 2005-09-25 15:31  hjanuschka
 
 	* ChangeLog, bartlby.c: \r getConfig bug fixed

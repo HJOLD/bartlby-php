@@ -64,7 +64,8 @@ PHP_FUNCTION(bartlby_delete_server);
 PHP_FUNCTION(bartlby_modify_server);
 PHP_FUNCTION(bartlby_get_server_by_id);
 
-
+PHP_FUNCTION(bartlby_encode);
+PHP_FUNCTION(bartlby_decode);
 
 PHP_FUNCTION(bartlby_add_service);
 PHP_FUNCTION(bartlby_delete_service);
@@ -126,6 +127,7 @@ struct shm_header {
 		char  version[50];
 		int do_reload;
 		int last_replication;
+		int startup_time;
 
 };
 
