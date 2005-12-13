@@ -6,6 +6,12 @@ $cfgfile="/storage/SF.NET/BARTLBY/bartlby-core/bartlby.cfg";
 //var_dump(bartlby_get_service($cfgfile, 1));
 //var_dump(bartlby_get_info($cfgfile, 1));
 
+echo "bartlby_get_service_map() \n";
+$svcmap=bartlby_get_service_map($cfgfile);
+var_dump($svcmap);
+exit;
+
+
 $info=@bartlby_get_info($cfgfile);
 if(!$info) {
 	echo "NOT RUNN\n";

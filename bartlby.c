@@ -75,6 +75,7 @@ function_entry bartlby_functions[] = {
 	
 	
 	PHP_FE(bartlby_reload, NULL)
+	PHP_FE(bartlby_shm_destroy, NULL)
 	
 	{NULL, NULL, NULL}	/* Must be the last line in bartlby_functions[] */
 };
@@ -440,6 +441,41 @@ PHP_FUNCTION(bartlby_decode) {
 	xbartlby_decode(Z_STRVAL_P(instr), strlen(Z_STRVAL_P(instr)));
 	
 	RETURN_STRING(Z_STRVAL_P(instr),1);	
+}
+PHP_FUNCTION(bartlby_shm_destroy) {
+	char * shmtok;
+	int shm_id;
+	void * bartlby_address;
+	struct shm_header * shm_hdr;
+	struct shmid_ds shm_desc;
+	
+	
+	pval * bartlby_config;
+	
+	
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &bartlby_config)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}	
+	
+	convert_to_string(bartlby_config);
+	
+	if (array_init(return_value) == FAILURE) {
+		RETURN_FALSE;
+	}
+	
+	shmtok = getConfigValue("shm_key", Z_STRVAL_P(bartlby_config));
+	if(shmtok == NULL) {
+		RETURN_FALSE;
+	}		
+	
+	
+	shm_id = shmget(ftok(shmtok, 32), 0,  0777);
+	
+	shmctl(shm_id, IPC_RMID, &shm_desc);
+	
+	
+	free(shmtok);
+	RETURN_TRUE;	
 }
 
 PHP_FUNCTION(bartlby_reload) {
@@ -1337,6 +1373,8 @@ PHP_FUNCTION(bartlby_get_service) {
 		
 		
 		add_assoc_string(return_value, "service_var", svcmap[Z_LVAL_P(bartlby_service_id)].service_var, 1);
+		//add_assoc_long(return_value, "service_threshold", svcmap[Z_LVAL_P(bartlby_service_id)].service_threshold);
+		
 		shmdt(bartlby_address);
 	/*	
 		int service_id;

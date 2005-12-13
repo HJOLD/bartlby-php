@@ -1,3 +1,9 @@
+2005-10-01 01:58  hjanuschka
+
+	* ChangeLog, bartlby.c, php_bartlby.h: get_info -> startup_time
+	  bartlby_encode/bartlby_decode functions added, for hand made
+	  client communication
+
 2005-09-25 18:32  hjanuschka
 
 	* ChangeLog, bartlby.c, php_bartlby.h: add/modify worker -> enable

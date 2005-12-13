@@ -79,6 +79,8 @@ PHP_FUNCTION(bartlby_modify_worker);
 PHP_FUNCTION(bartlby_get_worker_by_id);
 
 PHP_FUNCTION(bartlby_reload);
+PHP_FUNCTION(bartlby_shm_destroy);
+
 
 PHP_FUNCTION(bartlbe_toggle_service_notify);
 PHP_FUNCTION(bartlbe_toggle_service_active);
@@ -164,6 +166,8 @@ struct service {
 	int service_type;
 	int service_passive_timeout;
 	
+	int notify_last_state;
+	int notify_last_time;
 };
 
 struct worker {
