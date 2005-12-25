@@ -5,6 +5,11 @@ $cfgfile="/storage/SF.NET/BARTLBY/bartlby-core/bartlby.cfg";
 //var_dump($info);
 //var_dump(bartlby_get_service($cfgfile, 1));
 //var_dump(bartlby_get_info($cfgfile, 1));
+dl("bartlby.so");
+$mod_service=bartlby_modify_service("/storage/SF.NET/BARTLBY/bartlby-core/bartlby.cfg", 3186 , 14, "bartlby_swap.sh","timeouttest","",1, 00, 24, 00, 59,10,1,"", 0, 12);
+echo "bartlby_modify_server()\n";
+var_dump($mod_service);
+exit;
 
 echo "bartlby_get_service_map() \n";
 $svcmap=bartlby_get_service_map($cfgfile);

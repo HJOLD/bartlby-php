@@ -1,3 +1,9 @@
+2005-12-13 23:23  hjanuschka
+
+	* ChangeLog, bartlby.c, bartlby.php, php_bartlby.h:
+	  bartlby_shm_destroy() -> to destroy zombie/dead SHM segments via
+	  UI
+
 2005-10-01 01:58  hjanuschka
 
 	* ChangeLog, bartlby.c, php_bartlby.h: get_info -> startup_time
