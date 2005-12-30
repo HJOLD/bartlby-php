@@ -73,6 +73,7 @@ function_entry bartlby_functions[] = {
 	PHP_FE(bartlbe_toggle_service_notify, NULL)
 	PHP_FE(bartlbe_toggle_service_active, NULL)
 	
+	PHP_FE(bartlby_svc_map,NULL)
 	
 	PHP_FE(bartlby_reload, NULL)
 	PHP_FE(bartlby_shm_destroy, NULL)
@@ -416,7 +417,106 @@ PHP_FUNCTION(bartlbe_toggle_service_notify) {
 		RETURN_FALSE;
 	}	
 }
+PHP_FUNCTION(bartlby_svc_map) {
+	zval * subarray;
+	char * shmtok;
+	int shm_id;
+	void * bartlby_address;
+	struct shm_header * shm_hdr;
+	
+	int x;
+	struct service * svcmap;
+	
+	
+	pval * bartlby_config;
+	
+	
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &bartlby_config)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}	
+	
+	convert_to_string(bartlby_config);
+	
+	if (array_init(return_value) == FAILURE) {
+		RETURN_FALSE;
+	}
+	
+	bartlby_address=bartlby_get_shm(Z_STRVAL_P(bartlby_config));
+	if(bartlby_address != NULL) {
+		shm_hdr=(struct shm_header *)(void *)bartlby_address;
+		svcmap=(struct service *)(void *)bartlby_address+sizeof(struct shm_header);
+		
+		for(x=0; x<shm_hdr->svccount; x++) {
+			ALLOC_INIT_ZVAL(subarray);
+			array_init(subarray);
+			add_assoc_long(subarray, "service_id", svcmap[x].service_id);
+			add_assoc_long(subarray, "server_id", svcmap[x].server_id);
+			add_assoc_long(subarray, "last_state", svcmap[x].last_state);
+			add_assoc_long(subarray, "current_state", svcmap[x].current_state);
+			add_assoc_long(subarray, "client_port", svcmap[x].client_port);
+					
+			add_assoc_string(subarray, "new_server_text", svcmap[x].new_server_text, 1);
+			add_assoc_string(subarray, "service_name", svcmap[x].service_name, 1);
+			add_assoc_string(subarray, "server_name", svcmap[x].server_name, 1);
+			add_assoc_string(subarray, "client_ip", svcmap[x].client_ip, 1);
+			add_assoc_string(subarray, "plugin", svcmap[x].plugin, 1);
+			add_assoc_string(subarray, "plugin_arguments", svcmap[x].plugin_arguments, 1);
+			
+			add_assoc_long(subarray, "check_interval", svcmap[x].check_interval);
+			add_assoc_long(subarray, "last_check", svcmap[x].last_check);
+			
+			add_assoc_long(subarray, "hour_from", svcmap[x].hour_from);
+			add_assoc_long(subarray, "min_from", svcmap[x].min_from);
+			add_assoc_long(subarray, "hour_to", svcmap[x].hour_to);
+			add_assoc_long(subarray, "min_to", svcmap[x].min_to);
+			
+			add_assoc_long(subarray, "notify_enabled", svcmap[x].notify_enabled);
+			add_assoc_long(subarray, "last_notify_send", svcmap[x].last_notify_send);
+			add_assoc_long(subarray, "flap_count", svcmap[x].flap_count);
+			
+			
+			add_assoc_long(subarray, "service_active", svcmap[x].service_active);
+			add_assoc_long(subarray, "service_type", svcmap[x].service_type);
+			add_assoc_long(subarray, "service_passive_timeout", svcmap[x].service_passive_timeout);
+			
+			
+			add_assoc_string(subarray, "service_var", svcmap[x].service_var, 1);
+			add_assoc_long(subarray, "service_check_timeout", svcmap[x].service_check_timeout);
+			//Push SVC to map
+			add_next_index_zval(return_value, subarray);
+			
+		}
+		
+		
+		
+		shmdt(bartlby_address);
+		
 
+	
+	} else {
+		php_error(E_WARNING, "SHM segment is not existing (bartlby running?)");	
+		free(shmtok);
+		RETURN_FALSE;
+	}
+		
+	
+	/*
+	array_init(return_value);
+	
+	add_index_long(return_value,100, 1);
+	ALLOC_INIT_ZVAL(subarray);
+	array_init(subarray);
+	add_next_index_string(subarray,"testsub", 1);
+	add_assoc_zval(return_value, "sub", subarray);
+	
+	
+	ALLOC_INIT_ZVAL(subarray);
+	array_init(subarray);
+	add_next_index_string(subarray,"testsub1", 1);
+	add_assoc_zval(return_value, "sub1", subarray);
+	*/
+		
+}
 PHP_FUNCTION(bartlby_encode) {
 	pval * instr;
 	

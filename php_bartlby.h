@@ -79,6 +79,7 @@ PHP_FUNCTION(bartlby_modify_worker);
 PHP_FUNCTION(bartlby_get_worker_by_id);
 
 PHP_FUNCTION(bartlby_reload);
+PHP_FUNCTION(bartlby_svc_map);
 PHP_FUNCTION(bartlby_shm_destroy);
 
 

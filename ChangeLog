@@ -1,3 +1,8 @@
+2005-12-25 13:57  hjanuschka
+
+	* ChangeLog, bartlby.c, bartlby.php, php_bartlby.h:
+	  service_check_timeout added (modify/get/get_by_id/add Service)
+
 2005-12-13 23:23  hjanuschka
 
 	* ChangeLog, bartlby.c, bartlby.php, php_bartlby.h:
