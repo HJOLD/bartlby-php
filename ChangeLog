@@ -1,3 +1,8 @@
+2005-12-30 21:20  hjanuschka
+
+	* ChangeLog, bartlby.c, php_bartlby.h: massive speed improvment via
+	  bartlby_svc_map built into extension
+
 2005-12-25 13:57  hjanuschka
 
 	* ChangeLog, bartlby.c, bartlby.php, php_bartlby.h:

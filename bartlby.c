@@ -417,6 +417,37 @@ PHP_FUNCTION(bartlbe_toggle_service_notify) {
 		RETURN_FALSE;
 	}	
 }
+int btl_is_array(pval * ar, int service_id) {
+	HashTable *arr_hash;
+	zval **data;
+    	HashPosition pointer;
+    	int array_count;
+    	char * string_key;
+    	int str_key_len;
+    	long num_key;
+    	
+    	if(Z_TYPE_P(ar) != IS_ARRAY) {
+    		return 1;
+    	}
+	
+	arr_hash = Z_ARRVAL_P(ar);
+    	array_count = zend_hash_num_elements(arr_hash);
+    	for(zend_hash_internal_pointer_reset_ex(arr_hash, &pointer); zend_hash_get_current_data_ex(arr_hash, (void**) &data, &pointer) == SUCCESS; zend_hash_move_forward_ex(arr_hash, &pointer)) {
+
+            if(Z_TYPE_PP(data) == IS_STRING) {
+            	//printf("String: %s\n", Z_STRVAL_PP(data));	
+            } else if(Z_TYPE_PP(data) == IS_LONG) {
+            	//printf("Long: %d\n", Z_LVAL_PP(data));	
+            	if(Z_LVAL_PP(data) == service_id) {
+        		return 1;
+        	}
+            }
+
+            	
+    	}
+    	return -1;
+}
+
 PHP_FUNCTION(bartlby_svc_map) {
 	zval * subarray;
 	char * shmtok;
@@ -429,9 +460,10 @@ PHP_FUNCTION(bartlby_svc_map) {
 	
 	
 	pval * bartlby_config;
+	pval * svc_right_array;
+	pval * server_right_array;
 	
-	
-	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &bartlby_config)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &bartlby_config, &svc_right_array, &server_right_array)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}	
 	
@@ -447,6 +479,11 @@ PHP_FUNCTION(bartlby_svc_map) {
 		svcmap=(struct service *)(void *)bartlby_address+sizeof(struct shm_header);
 		
 		for(x=0; x<shm_hdr->svccount; x++) {
+			
+			if(btl_is_array(svc_right_array, svcmap[x].service_id) == -1 && btl_is_array(server_right_array, svcmap[x].server_id) == -1) {
+				continue;	
+			}
+			
 			ALLOC_INIT_ZVAL(subarray);
 			array_init(subarray);
 			add_assoc_long(subarray, "service_id", svcmap[x].service_id);
@@ -482,6 +519,7 @@ PHP_FUNCTION(bartlby_svc_map) {
 			
 			add_assoc_string(subarray, "service_var", svcmap[x].service_var, 1);
 			add_assoc_long(subarray, "service_check_timeout", svcmap[x].service_check_timeout);
+			add_assoc_long(subarray, "shm_place", x);
 			//Push SVC to map
 			add_next_index_zval(return_value, subarray);
 			
