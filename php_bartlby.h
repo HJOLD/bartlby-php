@@ -17,6 +17,8 @@
 
   $Id$ 
 */
+#define DT_SERVICE 1
+#define DT_SERVER 2
 
 #ifndef PHP_BARTLBY_H
 #define PHP_BARTLBY_H
@@ -78,6 +80,11 @@ PHP_FUNCTION(bartlby_delete_worker);
 PHP_FUNCTION(bartlby_modify_worker);
 PHP_FUNCTION(bartlby_get_worker_by_id);
 
+PHP_FUNCTION(bartlby_add_downtime);
+PHP_FUNCTION(bartlby_downtime_map);
+PHP_FUNCTION(bartlby_modify_downtime);
+PHP_FUNCTION(bartlby_delete_downtime);
+
 PHP_FUNCTION(bartlby_reload);
 PHP_FUNCTION(bartlby_svc_map);
 PHP_FUNCTION(bartlby_shm_destroy);
@@ -123,14 +130,18 @@ ZEND_END_MODULE_GLOBALS(bartlby)
  */
 
 
+
+
 struct shm_header {
 	        int svccount;
 	        int wrkcount;
+	        
 	        int current_running;
 		char  version[50];
 		int do_reload;
 		int last_replication;
 		int startup_time;
+		int dtcount;
 
 };
 
@@ -170,6 +181,8 @@ struct service {
 	int notify_last_state;
 	int notify_last_time;
 	int service_check_timeout;
+	
+	
 };
 
 struct worker {
@@ -190,4 +203,15 @@ struct worker {
 	char t[500];
 
 }sa;
+
+
+struct downtime {
+	int downtime_id;
+	int downtime_type;
+	int downtime_from;
+	int downtime_to;
+	char downtime_notice[2048];
+	int service_id;
+	
+}sb;
 
