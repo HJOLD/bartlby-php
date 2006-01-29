@@ -181,7 +181,7 @@ struct service {
 	int notify_last_state;
 	int notify_last_time;
 	int service_check_timeout;
-	
+	char server_icon[1024];
 	
 };
 
