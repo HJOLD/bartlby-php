@@ -137,7 +137,7 @@ void xbartlby_decode(char * msg, int length) {
 	int x;
 		
 	for(x=0; x<length; x++) {
-		msg[x]=2^msg[x];	
+		//msg[x]=2^msg[x];	
 		
 	}
 	
@@ -145,7 +145,7 @@ void xbartlby_decode(char * msg, int length) {
 void xbartlby_encode(char * msg, int length) {
 	int x;
 	for(x=0; x<length; x++) {
-		msg[x]=msg[x]^2;	
+		//msg[x]=msg[x]^2;	
 	}
 	
 }
