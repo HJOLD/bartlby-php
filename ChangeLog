@@ -1,3 +1,13 @@
+2006-02-09 01:15  hjanuschka
+
+	* ChangeLog, bartlby.c: datalib: mysql/ catch failed logins core:
+	  fixed some setuid problems with datalib core: zero worker
+	  detected and logged core: network code re-worked, much faster and
+	  cleaner now core: encode/decode removed php: encode/decode
+	  removed ui: topology map manager added ui: nicer menu (flap) ui:
+	  server_detail (added) startup sh: pre-start check if logfile is
+	  writeable
+
 2006-01-29 16:52  hjanuschka
 
 	* ChangeLog, bartlby.c, php_bartlby.h: server icon

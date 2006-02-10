@@ -76,8 +76,11 @@ function_entry bartlby_functions[] = {
 	PHP_FE(bartlby_modify_downtime, NULL)
 	PHP_FE(bartlby_delete_downtime, NULL)
 	
-	PHP_FE(bartlbe_toggle_service_notify, NULL)
-	PHP_FE(bartlbe_toggle_service_active, NULL)
+	PHP_FE(bartlby_toggle_service_notify, NULL)
+	PHP_FE(bartlby_toggle_service_active, NULL)
+	
+	
+	PHP_FE(bartlby_toggle_sirene, NULL)
 	
 	PHP_FE(bartlby_svc_map,NULL)
 	
@@ -524,8 +527,56 @@ PHP_FUNCTION(bartlby_add_downtime) {
 	dlclose(SOHandle);
 	RETURN_LONG(ret);	
 }
+PHP_FUNCTION(bartlby_toggle_sirene) {
+	pval * bartlby_config;
+	pval * bartlby_service_id;
+	char * shmtok;
+	int shm_id;
+	void * bartlby_address;
+	struct shm_header * shm_hdr;
+	int r;
+	
+	struct service * svcmap;	
+	
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &bartlby_config)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string(bartlby_config);
+	
+	if (array_init(return_value) == FAILURE) {
+		RETURN_FALSE;
+	}
+	
+		
+	
+	
+	
+	bartlby_address=bartlby_get_shm(Z_STRVAL_P(bartlby_config)); 
+	if(bartlby_address != NULL) {
+		shm_hdr=(struct shm_header *)(void *)bartlby_address;
+		svcmap=(struct service *)(void *)bartlby_address+sizeof(struct shm_header);
+			
+		if(shm_hdr->sirene_mode== 1) {
+			shm_hdr->sirene_mode = 0;
+			r=0;
+		} else {
+			shm_hdr->sirene_mode = 1;
+			r=1;
+		}
+		shmdt(bartlby_address);
+		RETURN_LONG(r);
+		
+	
+	
+	} else {
+		php_error(E_WARNING, "SHM segment is not existing (bartlby running?)");	
+		free(shmtok);
+		RETURN_FALSE;
+	}	
+}
 
-PHP_FUNCTION(bartlbe_toggle_service_active) {
+
+PHP_FUNCTION(bartlby_toggle_service_active) {
 	pval * bartlby_config;
 	pval * bartlby_service_id;
 	char * shmtok;
@@ -579,7 +630,7 @@ PHP_FUNCTION(bartlbe_toggle_service_active) {
 	}	
 }
 
-PHP_FUNCTION(bartlbe_toggle_service_notify) {
+PHP_FUNCTION(bartlby_toggle_service_notify) {
 	pval * bartlby_config;
 	pval * bartlby_service_id;
 	char * shmtok;
@@ -1181,6 +1232,7 @@ PHP_FUNCTION(bartlby_get_info) {
 		add_assoc_long(return_value, "last_replication", shm_hdr->last_replication);
 		add_assoc_long(return_value, "startup_time", shm_hdr->startup_time);
 		add_assoc_long(return_value, "downtimes", shm_hdr->dtcount);
+		add_assoc_long(return_value, "sirene_mode", shm_hdr->sirene_mode);
 		shmdt(bartlby_address);
 	
 	} else {

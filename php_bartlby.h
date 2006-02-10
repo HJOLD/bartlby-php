@@ -90,8 +90,9 @@ PHP_FUNCTION(bartlby_svc_map);
 PHP_FUNCTION(bartlby_shm_destroy);
 
 
-PHP_FUNCTION(bartlbe_toggle_service_notify);
-PHP_FUNCTION(bartlbe_toggle_service_active);
+PHP_FUNCTION(bartlby_toggle_service_notify);
+PHP_FUNCTION(bartlby_toggle_service_active);
+PHP_FUNCTION(bartlby_toggle_sirene);
 /* 
   	Declare any global variables you may need between the BEGIN
 	and END macros here:     
@@ -142,7 +143,7 @@ struct shm_header {
 		int last_replication;
 		int startup_time;
 		int dtcount;
-
+		int sirene_mode;
 };
 
 struct service {
