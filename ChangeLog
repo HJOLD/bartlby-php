@@ -1,3 +1,7 @@
+2006-02-11 00:55  hjanuschka
+
+	* ChangeLog, bartlby.c, php_bartlby.h: sirene toggle added
+
 2006-02-09 01:15  hjanuschka
 
 	* ChangeLog, bartlby.c: datalib: mysql/ catch failed logins core:
