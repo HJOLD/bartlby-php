@@ -93,6 +93,8 @@ PHP_FUNCTION(bartlby_shm_destroy);
 PHP_FUNCTION(bartlby_toggle_service_notify);
 PHP_FUNCTION(bartlby_toggle_service_active);
 PHP_FUNCTION(bartlby_toggle_sirene);
+
+PHP_FUNCTION(bartlby_ack_problem);
 /* 
   	Declare any global variables you may need between the BEGIN
 	and END macros here:     
@@ -183,6 +185,7 @@ struct service {
 	int notify_last_time;
 	int service_check_timeout;
 	char server_icon[1024];
+	int service_ack;
 	
 };
 
