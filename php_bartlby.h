@@ -95,6 +95,9 @@ PHP_FUNCTION(bartlby_toggle_service_active);
 PHP_FUNCTION(bartlby_toggle_sirene);
 
 PHP_FUNCTION(bartlby_ack_problem);
+
+PHP_FUNCTION(bartlby_check_shm_size);
+
 /* 
   	Declare any global variables you may need between the BEGIN
 	and END macros here:     
@@ -136,16 +139,17 @@ ZEND_END_MODULE_GLOBALS(bartlby)
 
 
 struct shm_header {
-	        int svccount;
-	        int wrkcount;
-	        
-	        int current_running;
-		char  version[50];
-		int do_reload;
-		int last_replication;
-		int startup_time;
-		int dtcount;
-		int sirene_mode;
+	int size_of_structs;
+	int svccount;
+	int wrkcount;
+	int current_running;
+	char  version[50];
+	int do_reload;
+	int last_replication;
+	int startup_time;
+	int dtcount;
+	int sirene_mode;
+
 };
 
 struct service {

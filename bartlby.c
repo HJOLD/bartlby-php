@@ -89,6 +89,8 @@ function_entry bartlby_functions[] = {
 	
 	PHP_FE(bartlby_ack_problem, NULL)
 	
+	PHP_FE(bartlby_check_shm_size, NULL)
+	
 	{NULL, NULL, NULL}	/* Must be the last line in bartlby_functions[] */
 };
 /* }}} */
@@ -529,6 +531,57 @@ PHP_FUNCTION(bartlby_add_downtime) {
 	dlclose(SOHandle);
 	RETURN_LONG(ret);	
 }
+
+//size_of_structs=sizeof(struct shm_header)+sizeof(struct worker)+sizeof(struct service)+sizeof(struct downtime);
+
+
+PHP_FUNCTION(bartlby_check_shm_size) {
+	pval * bartlby_config;
+	pval * bartlby_service_id;
+	char * shmtok;
+	int shm_id;
+	void * bartlby_address;
+	struct shm_header * shm_hdr;
+	int my_size;
+	
+	struct service * svcmap;	
+	
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &bartlby_config)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string(bartlby_config);
+	
+	if (array_init(return_value) == FAILURE) {
+		RETURN_FALSE;
+	}
+	
+		
+	
+	
+	
+	bartlby_address=bartlby_get_shm(Z_STRVAL_P(bartlby_config)); 
+	if(bartlby_address != NULL) {
+		shm_hdr=(struct shm_header *)(void *)bartlby_address;
+		my_size=sizeof(struct shm_header)+sizeof(struct worker)+sizeof(struct service)+sizeof(struct downtime);
+		if(my_size != shm_hdr->size_of_structs) {	
+			shmdt(bartlby_address);
+			RETURN_FALSE;
+			
+		} else {
+			shmdt(bartlby_address);
+			RETURN_TRUE;
+		}		
+		
+		
+	
+	
+	} else {
+		php_error(E_WARNING, "SHM segment is not existing (bartlby running?)");	
+		free(shmtok);
+		RETURN_FALSE;
+	}	
+}
+
 PHP_FUNCTION(bartlby_toggle_sirene) {
 	pval * bartlby_config;
 	pval * bartlby_service_id;
@@ -1200,9 +1253,9 @@ PHP_FUNCTION(bartlby_get_worker_by_id) {
 	
 	LOAD_SYMBOL(GetWorkerById,SOHandle, "GetWorkerById");
 	
-	GetWorkerById(Z_LVAL_P(worker_id),&svc, Z_STRVAL_P(bartlby_config));
+	ret=GetWorkerById(Z_LVAL_P(worker_id),&svc, Z_STRVAL_P(bartlby_config));
 	
-	if(svc.name == NULL) {
+	if(ret < 0) {
 		RETURN_FALSE;	
 	} else {
 		if (array_init(return_value) == FAILURE) {
@@ -1364,8 +1417,8 @@ PHP_FUNCTION(bartlby_get_service_by_id) {
 	
 	LOAD_SYMBOL(GetServiceById,SOHandle, "GetServiceById");
 	
-	GetServiceById(Z_LVAL_P(service_id),&svc, Z_STRVAL_P(bartlby_config));
-	if(svc.server_name == NULL) {
+	ret=GetServiceById(Z_LVAL_P(service_id),&svc, Z_STRVAL_P(bartlby_config));
+	if(ret < 0) {
 		RETURN_FALSE;	
 	} else {
 		
@@ -1757,9 +1810,9 @@ PHP_FUNCTION(bartlby_get_server_by_id) {
 	
 	LOAD_SYMBOL(GetServerById,SOHandle, "GetServerById");
 	
-	GetServerById(Z_LVAL_P(server_id),&svc, Z_STRVAL_P(bartlby_config));
+	ret=GetServerById(Z_LVAL_P(server_id),&svc, Z_STRVAL_P(bartlby_config));
 	
-	if(svc.server_name == NULL) {
+	if(ret < 0) {
 		RETURN_FALSE;	
 	} else {
 		if (array_init(return_value) == FAILURE) {
