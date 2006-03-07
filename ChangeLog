@@ -1,3 +1,8 @@
+2006-02-25 03:00  hjanuschka
+
+	* ChangeLog, bartlby.c, php_bartlby.h: bartlby_check_shm_size added
+	  php: [worker|service|server]_by_id returns false if not found
+
 2006-02-17 21:10  hjanuschka
 
 	* bartlby.c, php_bartlby.h: new function bartlby_ack_problem

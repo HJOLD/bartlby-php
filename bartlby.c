@@ -165,7 +165,7 @@ char * getConfigValue(char * key, char * fname) {
 	
 	fp=fopen(fname, "r");
 	if(!fp) {
-		printf("fopen %s failed\n", fname);
+		php_error(E_WARNING, "Config file '%s' failed", fname);
 		return NULL;
 	}
 	
