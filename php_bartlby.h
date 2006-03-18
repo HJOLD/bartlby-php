@@ -149,6 +149,7 @@ struct shm_header {
 	int startup_time;
 	int dtcount;
 	int sirene_mode;
+	
 
 };
 
@@ -188,8 +189,15 @@ struct service {
 	int notify_last_state;
 	int notify_last_time;
 	int service_check_timeout;
+	
 	char server_icon[1024];
+	
 	int service_ack;
+	
+	int service_retain;
+	int service_retain_current;
+	
+	
 	
 };
 
@@ -222,4 +230,3 @@ struct downtime {
 	int service_id;
 	
 }sb;
-
