@@ -197,7 +197,7 @@ struct service {
 	int service_retain;
 	int service_retain_current;
 	
-	
+	int check_is_running;
 	
 };
 
