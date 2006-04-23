@@ -91,6 +91,8 @@ function_entry bartlby_functions[] = {
 	
 	PHP_FE(bartlby_check_shm_size, NULL)
 	
+	PHP_FE(bartlby_check_force, NULL)
+	
 	{NULL, NULL, NULL}	/* Must be the last line in bartlby_functions[] */
 };
 /* }}} */
@@ -786,6 +788,60 @@ PHP_FUNCTION(bartlby_toggle_service_notify) {
 		RETURN_FALSE;
 	}	
 }
+
+
+//bartlby_check_force
+PHP_FUNCTION(bartlby_check_force) {
+	pval * bartlby_config;
+	pval * bartlby_service_id;
+	char * shmtok;
+	int shm_id;
+	void * bartlby_address;
+	struct shm_header * shm_hdr;
+	int r;
+	struct service * svcmap; 
+	
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &bartlby_config, &bartlby_service_id)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_long(bartlby_service_id);
+	convert_to_string(bartlby_config);
+	
+	if (array_init(return_value) == FAILURE) {
+		RETURN_FALSE;
+	}
+	
+		
+	
+	
+	
+	bartlby_address=bartlby_get_shm(Z_STRVAL_P(bartlby_config)); 
+	if(bartlby_address != NULL) {
+		shm_hdr=(struct shm_header *)(void *)bartlby_address;
+		svcmap=(struct service *)(void *)bartlby_address+sizeof(struct shm_header);
+		
+		
+		if(Z_LVAL_P(bartlby_service_id) > shm_hdr->svccount-1) {
+			php_error(E_WARNING, "Service id out of bounds");	
+			RETURN_FALSE;	
+		}
+		svcmap[Z_LVAL_P(bartlby_service_id)].do_force = 1;	
+		r=1;
+		
+		
+		shmdt(bartlby_address);
+		RETURN_LONG(r);
+		
+	
+	
+	} else {
+		php_error(E_WARNING, "SHM segment is not existing (bartlby running?)");	
+		free(shmtok);
+		RETURN_FALSE;
+	}	
+}
+
+
 int btl_is_array(pval * ar, int service_id) {
 	HashTable *arr_hash;
 	zval **data;
@@ -900,6 +956,9 @@ PHP_FUNCTION(bartlby_svc_map) {
 			
 			add_assoc_long(subarray, "shm_place", x);
 			
+			add_assoc_long(subarray, "service_time_sum", svcmap[x].pstat.sum);
+			add_assoc_long(subarray, "service_time_count",svcmap[x].pstat.counter);
+		
 			
 			for(y=0; y<shm_hdr->dtcount; y++) {
 				is_down=0;
@@ -1342,6 +1401,10 @@ PHP_FUNCTION(bartlby_get_info) {
 		add_assoc_long(return_value, "startup_time", shm_hdr->startup_time);
 		add_assoc_long(return_value, "downtimes", shm_hdr->dtcount);
 		add_assoc_long(return_value, "sirene_mode", shm_hdr->sirene_mode);
+		
+		add_assoc_long(return_value, "round_time_sum", shm_hdr->pstat.sum);
+		add_assoc_long(return_value, "round_time_count", shm_hdr->pstat.counter);
+		
 		shmdt(bartlby_address);
 	
 	} else {
@@ -1964,6 +2027,11 @@ PHP_FUNCTION(bartlby_get_service) {
 		add_assoc_long(return_value, "service_retain", svcmap[Z_LVAL_P(bartlby_service_id)].service_retain);
 		add_assoc_long(return_value, "service_retain_current", svcmap[Z_LVAL_P(bartlby_service_id)].service_retain_current);
 		add_assoc_long(return_value, "check_is_running", svcmap[Z_LVAL_P(bartlby_service_id)].check_is_running);
+		
+		
+		add_assoc_long(return_value, "service_time_sum", svcmap[Z_LVAL_P(bartlby_service_id)].pstat.sum);
+		add_assoc_long(return_value, "service_time_count",svcmap[Z_LVAL_P(bartlby_service_id)].pstat.counter);
+		
 		
 		//Downtime 060120
 		is_down=0;
