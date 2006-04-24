@@ -47,6 +47,8 @@ extern zend_module_entry bartlby_module_entry;
     	
 
 #define BARTLBY_VERSION "0.9.8"
+#define EVENT_QUEUE_MAX 128
+
 
 PHP_MINIT_FUNCTION(bartlby);
 PHP_MSHUTDOWN_FUNCTION(bartlby);
@@ -98,6 +100,14 @@ PHP_FUNCTION(bartlby_ack_problem);
 
 PHP_FUNCTION(bartlby_check_shm_size);
 PHP_FUNCTION(bartlby_check_force);
+
+
+PHP_FUNCTION(bartlby_event_tick);
+PHP_FUNCTION(bartlby_event_fetch);
+
+
+
+
 /* 
   	Declare any global variables you may need between the BEGIN
 	and END macros here:     
@@ -156,7 +166,7 @@ struct shm_header {
 	int dtcount;
 	int sirene_mode;
 	struct perf_statistic pstat;
-	
+	int cur_event_index;
 
 };
 
@@ -241,3 +251,9 @@ struct downtime {
 	int service_id;
 	
 }sb;
+
+struct btl_event {
+	int evnt_id;
+	char evnt_message[1024];
+		
+}eb;

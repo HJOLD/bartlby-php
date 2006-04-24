@@ -93,6 +93,10 @@ function_entry bartlby_functions[] = {
 	
 	PHP_FE(bartlby_check_force, NULL)
 	
+	
+	PHP_FE(bartlby_event_tick, NULL)
+	PHP_FE(bartlby_event_fetch, NULL)
+	
 	{NULL, NULL, NULL}	/* Must be the last line in bartlby_functions[] */
 };
 /* }}} */
@@ -535,6 +539,96 @@ PHP_FUNCTION(bartlby_add_downtime) {
 }
 
 //size_of_structs=sizeof(struct shm_header)+sizeof(struct worker)+sizeof(struct service)+sizeof(struct downtime);
+
+PHP_FUNCTION(bartlby_event_tick) {
+	pval * bartlby_config;
+	pval * bartlby_service_id;
+	char * shmtok;
+	int shm_id;
+	void * bartlby_address;
+	struct shm_header * shm_hdr;
+	struct service * svcmap;
+	struct worker * wrkmap;
+	struct downtime * dtmap;
+	
+	int idx;
+		
+	
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &bartlby_config)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string(bartlby_config);
+	
+	if (array_init(return_value) == FAILURE) {
+		RETURN_FALSE;
+	}
+	
+		
+	
+	
+	
+	bartlby_address=bartlby_get_shm(Z_STRVAL_P(bartlby_config)); 
+	if(bartlby_address != NULL) {
+		shm_hdr=(struct shm_header *)(void *)bartlby_address;
+		idx=shm_hdr->cur_event_index;
+		shmdt(bartlby_address);
+		RETURN_LONG(idx);
+		
+	} else {
+		php_error(E_WARNING, "SHM segment is not existing (bartlby running?)");
+		RETURN_FALSE;
+	}	
+}
+
+PHP_FUNCTION(bartlby_event_fetch) {
+	pval * bartlby_config;
+	pval * bartlby_service_id;
+	pval * event_index;
+	char * shmtok;
+	int shm_id;
+	void * bartlby_address;
+	struct shm_header * shm_hdr;
+	struct service * svcmap;
+	struct worker * wrkmap;
+	struct downtime * dtmap;
+	struct btl_event * evntmap;
+		
+	
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &bartlby_config, &event_index)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string(bartlby_config);
+	convert_to_long(event_index);
+	
+	if (array_init(return_value) == FAILURE) {
+		RETURN_FALSE;
+	}
+	
+		
+	
+	
+	
+	bartlby_address=bartlby_get_shm(Z_STRVAL_P(bartlby_config)); 
+	if(bartlby_address != NULL) {
+		shm_hdr=(struct shm_header *)(void *)bartlby_address;
+		svcmap=(struct service *)(void *)bartlby_address+sizeof(struct shm_header);
+		wrkmap=(struct worker *)(void*)&svcmap[shm_hdr->svccount]+20;
+		dtmap=(struct downtime *)(void*)&wrkmap[shm_hdr->wrkcount]+20;
+		evntmap=(struct btl_event *)(void *)&dtmap[shm_hdr->dtcount]+20;
+		if(Z_LVAL_P(event_index) < EVENT_QUEUE_MAX) {
+			add_assoc_string(return_value, "message", evntmap[Z_LVAL_P(event_index)].evnt_message, 1);
+			add_assoc_long(return_value, "id", evntmap[Z_LVAL_P(event_index)].evnt_id);
+			shmdt(bartlby_address);
+		} else {
+			shmdt(bartlby_address);
+			RETURN_FALSE;
+		}
+		
+	} else {
+		php_error(E_WARNING, "SHM segment is not existing (bartlby running?)");
+		RETURN_FALSE;
+	}	
+}
 
 
 PHP_FUNCTION(bartlby_check_shm_size) {
