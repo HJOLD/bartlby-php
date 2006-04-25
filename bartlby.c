@@ -618,6 +618,7 @@ PHP_FUNCTION(bartlby_event_fetch) {
 		if(Z_LVAL_P(event_index) < EVENT_QUEUE_MAX) {
 			add_assoc_string(return_value, "message", evntmap[Z_LVAL_P(event_index)].evnt_message, 1);
 			add_assoc_long(return_value, "id", evntmap[Z_LVAL_P(event_index)].evnt_id);
+			add_assoc_long(return_value, "time", evntmap[Z_LVAL_P(event_index)].evnt_time);
 			shmdt(bartlby_address);
 		} else {
 			shmdt(bartlby_address);
