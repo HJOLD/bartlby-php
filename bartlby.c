@@ -7,7 +7,7 @@
   | This source file is subject to version 2.02 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available at through the world-wide-web at                           |
-  | http://www.php.net/license/2_02.txt.                                 |
+  | http://ww w.php.net/license/2_02.txt.                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -96,6 +96,8 @@ function_entry bartlby_functions[] = {
 	
 	PHP_FE(bartlby_event_tick, NULL)
 	PHP_FE(bartlby_event_fetch, NULL)
+	
+	PHP_FE(bartlby_set_passive, NULL)
 	
 	{NULL, NULL, NULL}	/* Must be the last line in bartlby_functions[] */
 };
@@ -725,6 +727,68 @@ PHP_FUNCTION(bartlby_toggle_sirene) {
 		RETURN_FALSE;
 	}	
 }
+
+
+PHP_FUNCTION(bartlby_set_passive) {
+	pval * bartlby_config;
+	pval * bartlby_new_state;
+	pval * bartlby_new_output;
+	pval * bartlby_service_id;
+	char * shmtok;
+	int shm_id;
+	void * bartlby_address;
+	struct shm_header * shm_hdr;
+	int r;
+	
+	struct service * svcmap;	
+	
+	if (ZEND_NUM_ARGS() != 4 || getParameters(ht, 4, &bartlby_config, &bartlby_service_id, &bartlby_new_state, &bartlby_new_output)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_long(bartlby_service_id);
+	convert_to_long(bartlby_new_state);
+	
+	convert_to_string(bartlby_config);
+	convert_to_string(bartlby_new_output);
+	
+	if (array_init(return_value) == FAILURE) {
+		RETURN_FALSE;
+	}
+	
+		
+	
+	
+	
+	bartlby_address=bartlby_get_shm(Z_STRVAL_P(bartlby_config)); 
+	if(bartlby_address != NULL) {
+		shm_hdr=(struct shm_header *)(void *)bartlby_address;
+		svcmap=(struct service *)(void *)bartlby_address+sizeof(struct shm_header);
+		
+		
+		if(Z_LVAL_P(bartlby_service_id) > shm_hdr->svccount-1) {
+			php_error(E_WARNING, "Service id out of bounds");	
+			RETURN_FALSE;	
+		}
+		
+		svcmap[Z_LVAL_P(bartlby_service_id)].last_state = svcmap[Z_LVAL_P(bartlby_service_id)].current_state;
+		svcmap[Z_LVAL_P(bartlby_service_id)].current_state = Z_LVAL_P(bartlby_new_state);	
+		snprintf(svcmap[Z_LVAL_P(bartlby_service_id)].new_server_text, 2040, "%s",Z_STRVAL_P(bartlby_new_output)); 
+		svcmap[Z_LVAL_P(bartlby_service_id)].last_check = time(NULL);	
+		
+		r=1;
+		shmdt(bartlby_address);
+		RETURN_LONG(r);
+		
+	
+	
+	} else {
+		php_error(E_WARNING, "SHM segment is not existing (bartlby running?)");	
+		free(shmtok);
+		RETURN_FALSE;
+	}	
+	
+}
+
 
 PHP_FUNCTION(bartlby_ack_problem) {
 	pval * bartlby_config;

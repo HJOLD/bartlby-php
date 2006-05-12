@@ -106,6 +106,9 @@ PHP_FUNCTION(bartlby_event_tick);
 PHP_FUNCTION(bartlby_event_fetch);
 
 
+PHP_FUNCTION(bartlby_set_passive);
+
+
 
 
 /* 
