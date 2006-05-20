@@ -1119,6 +1119,19 @@ PHP_FUNCTION(bartlby_svc_map) {
 			add_assoc_long(subarray, "service_time_count",svcmap[x].pstat.counter);
 		
 			
+			//bartlby_get_service_by_id
+			
+			add_assoc_string(subarray, "service_snmp_community", svcmap[x].snmp_info.community, 1);
+			add_assoc_string(subarray, "service_snmp_objid", svcmap[x].snmp_info.objid, 1);
+			
+			add_assoc_long(subarray, "service_snmp_warning",svcmap[x].snmp_info.warn);
+			add_assoc_long(subarray, "service_snmp_critical",svcmap[x].snmp_info.crit);
+			add_assoc_long(subarray, "service_snmp_version",svcmap[x].snmp_info.version);
+			add_assoc_long(subarray, "service_snmp_type",svcmap[x].snmp_info.type);
+			
+			
+			
+			
 			for(y=0; y<shm_hdr->dtcount; y++) {
 				is_down=0;
 				if(current_time >= dtmap[y].downtime_from && current_time <= dtmap[y].downtime_to) {
@@ -1686,7 +1699,13 @@ PHP_FUNCTION(bartlby_get_service_by_id) {
 		add_assoc_string(return_value, "service_var", svc.service_var, 1);
 		add_assoc_string(return_value, "service_icon", svc.server_icon, 1);
 		
+		add_assoc_string(return_value, "service_snmp_community", svc.snmp_info.community, 1);
+		add_assoc_string(return_value, "service_snmp_objid", svc.snmp_info.objid, 1);
 		
+		add_assoc_long(return_value, "service_snmp_warning",svc.snmp_info.warn);
+		add_assoc_long(return_value, "service_snmp_critical",svc.snmp_info.crit);
+		add_assoc_long(return_value, "service_snmp_version",svc.snmp_info.version);
+		add_assoc_long(return_value, "service_snmp_type",svc.snmp_info.type);
 		
 			
 	}
@@ -1742,6 +1761,7 @@ PHP_FUNCTION(bartlby_modify_service) {
 	int (*UpdateService)(struct service *, char *);
 	
 	pval *service_id, * server_id , * bartlby_config, * plugin, * service_name , * plugin_arguments, * notify_enabled, * hour_from, * hour_to, *min_from, *min_to, *check_interval, *service_type, *service_passive_timeout, *service_var, *service_check_timeout, * service_ack, * service_retain;
+	pval * snmp_community, * snmp_objid, *snmp_version, *snmp_warning, *snmp_critical, *snmp_type;
 	
 	/*
 	svc->server_id, 
@@ -1758,7 +1778,7 @@ PHP_FUNCTION(bartlby_modify_service) {
 	svc->service_passive_timeout
 	*/
 	
-	if(ZEND_NUM_ARGS() != 18 || getParameters(ht, 18, &bartlby_config,&service_id,  &server_id, &plugin,&service_name,&plugin_arguments,&notify_enabled,&hour_from,&hour_to,&min_from,&min_to,&check_interval, &service_type,&service_var,&service_passive_timeout,&service_check_timeout, &service_ack, &service_retain) == FAILURE) {
+	if(ZEND_NUM_ARGS() != 24 || getParameters(ht, 24, &bartlby_config,&service_id,  &server_id, &plugin,&service_name,&plugin_arguments,&notify_enabled,&hour_from,&hour_to,&min_from,&min_to,&check_interval, &service_type,&service_var,&service_passive_timeout,&service_check_timeout, &service_ack, &service_retain, &snmp_community, &snmp_objid, &snmp_version, &snmp_warning, &snmp_critical, &snmp_type) == FAILURE) {
 		WRONG_PARAM_COUNT;	
 	}
 	convert_to_string(bartlby_config);
@@ -1781,6 +1801,15 @@ PHP_FUNCTION(bartlby_modify_service) {
 	convert_to_long(service_ack);
 	convert_to_long(service_retain);
 	
+	
+	convert_to_string(snmp_community);
+	convert_to_string(snmp_objid);
+	convert_to_long(snmp_version);
+	convert_to_long(snmp_warning);
+	convert_to_long(snmp_critical);
+	convert_to_long(snmp_type);
+	
+	
 	svc.service_id=Z_LVAL_P(service_id);
 	sprintf(svc.plugin, "%s", Z_STRVAL_P(plugin));
 	sprintf(svc.service_name, "%s", Z_STRVAL_P(service_name));
@@ -1801,6 +1830,14 @@ PHP_FUNCTION(bartlby_modify_service) {
 	svc.service_type=Z_LVAL_P(service_type);
 	svc.service_passive_timeout=Z_LVAL_P(service_passive_timeout);
 	sprintf(svc.service_var, "%s", Z_STRVAL_P(service_var));
+	
+	sprintf(svc.snmp_info.community, "%s", Z_STRVAL_P(snmp_community));
+	sprintf(svc.snmp_info.objid, "%s", Z_STRVAL_P(snmp_objid));
+	svc.snmp_info.version=Z_LVAL_P(snmp_version);
+	svc.snmp_info.warn=Z_LVAL_P(snmp_warning);
+	svc.snmp_info.crit=Z_LVAL_P(snmp_critical);
+	svc.snmp_info.type=Z_LVAL_P(snmp_type);
+	
 	
 	SOHandle=bartlby_get_sohandle(Z_STRVAL_P(bartlby_config));
 	if(SOHandle == NULL) {
@@ -1834,6 +1871,9 @@ PHP_FUNCTION(bartlby_add_service) {
 	int (*AddService)(struct service *, char *);
 	
 	pval * server_id , * bartlby_config, * plugin, * service_name , * plugin_arguments, * notify_enabled, * hour_from, * hour_to, *min_from, *min_to, *check_interval, *service_type, *service_passive_timeout, *service_var, * service_check_timeout, * service_ack, * service_retain;
+	pval * snmp_community, * snmp_objid, *snmp_version, *snmp_warning, *snmp_critical, *snmp_type;
+	
+	
 	
 	/*
 	svc->server_id, 
@@ -1851,7 +1891,7 @@ PHP_FUNCTION(bartlby_add_service) {
 	svc->service_ack
 	*/
 	
-	if(ZEND_NUM_ARGS() != 17 || getParameters(ht, 17, &bartlby_config, &server_id, &plugin,&service_name,&plugin_arguments,&notify_enabled,&hour_from,&hour_to,&min_from,&min_to,&check_interval, &service_type,&service_var,&service_passive_timeout, &service_check_timeout, &service_ack, &service_retain) == FAILURE) {
+	if(ZEND_NUM_ARGS() != 23 || getParameters(ht, 23, &bartlby_config, &server_id, &plugin,&service_name,&plugin_arguments,&notify_enabled,&hour_from,&hour_to,&min_from,&min_to,&check_interval, &service_type,&service_var,&service_passive_timeout, &service_check_timeout, &service_ack, &service_retain, &snmp_community, &snmp_objid, &snmp_version, &snmp_warning, &snmp_critical, &snmp_type) == FAILURE) {
 		WRONG_PARAM_COUNT;	
 	}
 	convert_to_string(bartlby_config);
@@ -1871,6 +1911,14 @@ PHP_FUNCTION(bartlby_add_service) {
 	convert_to_string(service_var);
 	convert_to_long(service_ack);
 	convert_to_long(service_retain);
+	
+	
+	convert_to_string(snmp_community);
+	convert_to_string(snmp_objid);
+	convert_to_long(snmp_version);
+	convert_to_long(snmp_warning);
+	convert_to_long(snmp_critical);
+	convert_to_long(snmp_type);
 	
 	
 	sprintf(svc.plugin, "%s", Z_STRVAL_P(plugin));
@@ -1896,6 +1944,15 @@ PHP_FUNCTION(bartlby_add_service) {
 	svc.service_type=Z_LVAL_P(service_type);
 	svc.service_passive_timeout=Z_LVAL_P(service_passive_timeout);
 	sprintf(svc.service_var, "%s", Z_STRVAL_P(service_var));
+	
+	sprintf(svc.snmp_info.community, "%s", Z_STRVAL_P(snmp_community));
+	sprintf(svc.snmp_info.objid, "%s", Z_STRVAL_P(snmp_objid));
+	svc.snmp_info.version=Z_LVAL_P(snmp_version);
+	svc.snmp_info.warn=Z_LVAL_P(snmp_warning);
+	svc.snmp_info.crit=Z_LVAL_P(snmp_critical);
+	svc.snmp_info.type=Z_LVAL_P(snmp_type);
+	
+	
 	
 	SOHandle=bartlby_get_sohandle(Z_STRVAL_P(bartlby_config));
 	if(SOHandle == NULL) {
@@ -2190,6 +2247,18 @@ PHP_FUNCTION(bartlby_get_service) {
 		
 		add_assoc_long(return_value, "service_time_sum", svcmap[Z_LVAL_P(bartlby_service_id)].pstat.sum);
 		add_assoc_long(return_value, "service_time_count",svcmap[Z_LVAL_P(bartlby_service_id)].pstat.counter);
+		
+		
+		add_assoc_string(return_value, "service_var",  svcmap[Z_LVAL_P(bartlby_service_id)].service_var, 1);
+		add_assoc_string(return_value, "service_icon",  svcmap[Z_LVAL_P(bartlby_service_id)].server_icon, 1);
+		
+		add_assoc_string(return_value, "service_snmp_community",  svcmap[Z_LVAL_P(bartlby_service_id)].snmp_info.community, 1);
+		add_assoc_string(return_value, "service_snmp_objid",  svcmap[Z_LVAL_P(bartlby_service_id)].snmp_info.objid, 1);
+		
+		add_assoc_long(return_value, "service_snmp_warning", svcmap[Z_LVAL_P(bartlby_service_id)].snmp_info.warn);
+		add_assoc_long(return_value, "service_snmp_critical", svcmap[Z_LVAL_P(bartlby_service_id)].snmp_info.crit);
+		add_assoc_long(return_value, "service_snmp_version", svcmap[Z_LVAL_P(bartlby_service_id)].snmp_info.version);
+		add_assoc_long(return_value, "service_snmp_type", svcmap[Z_LVAL_P(bartlby_service_id)].snmp_info.type);
 		
 		
 		//Downtime 060120

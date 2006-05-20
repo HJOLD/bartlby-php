@@ -148,14 +148,26 @@ ZEND_END_MODULE_GLOBALS(bartlby)
  * End:
  */
 
-
-
+struct shm_counter {
+	int worker;
+	int services;
+	int downtimes;	
+};
 
 struct perf_statistic {
 	long sum;
 	long counter;	
 };
 
+
+struct snmpi {
+	char community[512];
+	int version;
+	char objid[1024];
+	int warn;
+	int crit;
+	int type;
+};
 
 struct shm_header {
 	int size_of_structs;
@@ -170,7 +182,7 @@ struct shm_header {
 	int sirene_mode;
 	struct perf_statistic pstat;
 	int cur_event_index;
-
+	
 };
 
 struct service {
@@ -223,6 +235,8 @@ struct service {
 	
 	int do_force;
 	
+	struct snmpi snmp_info;
+	
 };
 
 struct worker {
@@ -259,4 +273,5 @@ struct btl_event {
 	int evnt_id;
 	char evnt_message[1024];
 	int evnt_time;
+		
 }eb;

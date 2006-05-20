@@ -1,3 +1,57 @@
+2006-05-13 01:40  hjanuschka
+
+	* bartlby.c, php_bartlby.h: [no log message]
+
+2006-04-25 09:18  hjanuschka
+
+	* bartlby.c, php_bartlby.h: events now have a timestamp too
+
+2006-04-25 00:20  hjanuschka
+
+	* bartlby.c, php_bartlby.h: php: new functions for event queue
+	  (bartlby_event_tick, bartlby_event_fetch)
+
+2006-04-23 20:08  hjanuschka
+
+	* bartlby.c, php_bartlby.h: core/ui/php: checks can now be forced
+	  ui: remote xml special_addon support core: svc perf MS core:
+	  round perf MS php: svcmap, get_service perf MS ui: perf MS
+
+2006-04-10 00:13  hjanuschka
+
+	* bartlby.c, php_bartlby.h: R E L E A S E (1.1.8a -> Naproxen):
+
+	  perf: distribute RRDs correspodening to the perf handler core:
+	  sched_timeout refined core: service_retain core: lib/mysql
+	  service_retain php: service_retain ui: overview supports remote
+	  bartlby's ui: server/service detail supports remote bartlby's ui:
+	  services list supports remote bartlby ui: service_retain ui: add
+	  perf defaults to package ui: catch un-existing objects,
+	  server|service|worker ui: exit if either built in nor shared
+	  bartlby extension was found (discovered during php upgrade ) ui:
+	  addons got own config file (ui-extra.conf) php: E_WARNING on
+	  unexisting config file
+
+2006-03-18 02:55  hjanuschka
+
+	* bartlby.c, php_bartlby.h: perf: distribute RRDs correspodening to
+	  the perf handler core: sched_timeout refined core: service_retain
+	  core: lib/mysql service_retain php: service_retain ui:
+	  service_retain ui: add perf defaults to package ui: catch
+	  un-existing objects, server|service|worker ui: exit if either
+	  built in nor shared bartlby extension was found (discovered
+	  during php upgrade ) ui: addons got own config file
+	  (ui-extra.conf) php: E_WARNING on unexisting config file
+
+2006-03-07 21:58  hjanuschka
+
+	* ChangeLog, bartlby.c: perf: distribute RRDs correspodening to the
+	  perf handler ui: add perf defaults to package ui: catch
+	  un-existing objects, server|service|worker ui: exit if either
+	  built in nor shared bartlby extension was found (discovered
+	  during php upgrade ) ui: addons got own config file
+	  (ui-extra.conf) php: E_WARNING on unexisting config file
+
 2006-02-25 03:00  hjanuschka
 
 	* ChangeLog, bartlby.c, php_bartlby.h: bartlby_check_shm_size added
