@@ -1,7 +1,2 @@
-copy this directory to <PHP-SOURCE>/ext/
-cd <PHP-SOURCE>
-./buildconf
-./configure --with-bartlby
-make
-make_install
-php -f <PHP-SOURCE>/ext/bartlby/bartlby.php # to test it :-)
+refer to our wiki please!
+http://wiki.bartlby.org/dokuwiki/doku.php#php

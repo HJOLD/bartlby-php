@@ -1,3 +1,10 @@
+2006-05-20 22:26  hjanuschka
+
+	* ChangeLog, bartlby.c, php_bartlby.h: ui: add/modify server page
+	  rebrush (should be user-friendlier) core: snmp INTEGER greater,
+	  lower (warning,critical) (--enable-snmp=yes) core/lib mysql: SNMP
+	  functionality ui: add/modify_service SNMP php: SNMP functions
+
 2006-05-13 01:40  hjanuschka
 
 	* bartlby.c, php_bartlby.h: [no log message]
