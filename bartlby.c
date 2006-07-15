@@ -849,8 +849,11 @@ PHP_FUNCTION(bartlby_toggle_service_active) {
 	void * bartlby_address;
 	struct shm_header * shm_hdr;
 	int r;
+	void * SOHandle;
+	char * dlmsg;
 	
 	struct service * svcmap;	
+	int (*UpdateService)(struct service *, char *);
 	
 	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &bartlby_config, &bartlby_service_id)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -864,7 +867,11 @@ PHP_FUNCTION(bartlby_toggle_service_active) {
 	
 		
 	
-	
+	SOHandle=bartlby_get_sohandle(Z_STRVAL_P(bartlby_config));
+	if(SOHandle == NULL) {
+		php_error(E_WARNING, "bartlby SO error");	
+		RETURN_FALSE;	
+	}
 	
 	bartlby_address=bartlby_get_shm(Z_STRVAL_P(bartlby_config)); 
 	if(bartlby_address != NULL) {
@@ -883,6 +890,11 @@ PHP_FUNCTION(bartlby_toggle_service_active) {
 			svcmap[Z_LVAL_P(bartlby_service_id)].service_active = 1;	
 			r=1;
 		}
+		
+		LOAD_SYMBOL(UpdateService,SOHandle, "doUpdate");
+		UpdateService(&svcmap[Z_LVAL_P(bartlby_service_id)], Z_STRVAL_P(bartlby_config));
+		
+		dlclose(SOHandle);
 		shmdt(bartlby_address);
 		RETURN_LONG(r);
 		
