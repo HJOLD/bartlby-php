@@ -237,6 +237,7 @@ struct service {
 	
 	struct snmpi snmp_info;
 	
+	int recovery_outstanding; //Flag to see if recover is waiting
 };
 
 struct worker {
