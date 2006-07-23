@@ -1,3 +1,16 @@
+2006-07-18 23:38  hjanuschka
+
+	* php_bartlby.h: updated header file
+
+2006-07-15 16:01  hjanuschka
+
+	* bartlby.c: add/modify service -> check_enabled 0|1
+
+2006-07-15 15:17  hjanuschka
+
+	* ChangeLog, bartlby.c: php: disabled services get stored back via
+	  datalib
+
 2006-06-03 23:13  hjanuschka
 
 	* ChangeLog, INSTALL: [no log message]
