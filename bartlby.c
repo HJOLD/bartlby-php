@@ -1709,7 +1709,7 @@ PHP_FUNCTION(bartlby_get_service_by_id) {
 		
 		
 		add_assoc_string(return_value, "service_var", svc.service_var, 1);
-		add_assoc_string(return_value, "service_icon", svc.server_icon, 1);
+		add_assoc_string(return_value, "server_icon", svc.server_icon, 1);
 		
 		add_assoc_string(return_value, "service_snmp_community", svc.snmp_info.community, 1);
 		add_assoc_string(return_value, "service_snmp_objid", svc.snmp_info.objid, 1);
@@ -2267,7 +2267,7 @@ PHP_FUNCTION(bartlby_get_service) {
 		
 		
 		add_assoc_string(return_value, "service_var",  svcmap[Z_LVAL_P(bartlby_service_id)].service_var, 1);
-		add_assoc_string(return_value, "service_icon",  svcmap[Z_LVAL_P(bartlby_service_id)].server_icon, 1);
+		add_assoc_string(return_value, "server_icon",  svcmap[Z_LVAL_P(bartlby_service_id)].server_icon, 1);
 		
 		add_assoc_string(return_value, "service_snmp_community",  svcmap[Z_LVAL_P(bartlby_service_id)].snmp_info.community, 1);
 		add_assoc_string(return_value, "service_snmp_objid",  svcmap[Z_LVAL_P(bartlby_service_id)].snmp_info.objid, 1);
