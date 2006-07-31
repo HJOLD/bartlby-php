@@ -99,6 +99,11 @@ function_entry bartlby_functions[] = {
 	
 	PHP_FE(bartlby_set_passive, NULL)
 	
+	PHP_FE(bartlby_set_server_id, NULL)
+	PHP_FE(bartlby_set_service_id, NULL)
+	PHP_FE(bartlby_set_worker_id, NULL)
+	PHP_FE(bartlby_set_downtime_id, NULL)
+	
 	{NULL, NULL, NULL}	/* Must be the last line in bartlby_functions[] */
 };
 /* }}} */
@@ -330,6 +335,159 @@ PHP_FUNCTION(confirm_bartlby_compiled)
 PHP_FUNCTION(bartlby_version) {
 	RETURN_STRING(BARTLBY_VERSION,1);	
 	
+}
+PHP_FUNCTION(bartlby_set_downtime_id) {
+	pval * bartlby_config;
+	pval * from;
+	pval * to;
+	pval * mig;
+	
+	void * SOHandle;
+	char * dlmsg;
+	
+	int ret;
+	
+	int (*DowntimeChangeId)(int, int, char*);
+	
+	
+	
+	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &bartlby_config,&from, &to)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string(bartlby_config);
+	convert_to_long(from);
+	convert_to_long(to);
+	
+	SOHandle=bartlby_get_sohandle(Z_STRVAL_P(bartlby_config));
+	if(SOHandle == NULL) {
+		php_error(E_WARNING, "bartlby SO error");	
+		RETURN_FALSE;	
+	}
+	
+	
+	LOAD_SYMBOL(DowntimeChangeId,SOHandle, "DowntimeChangeId");
+	
+	
+	
+	ret=DowntimeChangeId(Z_LVAL_P(from),Z_LVAL_P(to),Z_STRVAL_P(bartlby_config));
+	
+	dlclose(SOHandle);
+	RETURN_LONG(ret);	
+}
+PHP_FUNCTION(bartlby_set_worker_id) {
+	pval * bartlby_config;
+	pval * from;
+	pval * to;
+	pval * mig;
+	
+	void * SOHandle;
+	char * dlmsg;
+	
+	int ret;
+	
+	int (*WorkerChangeId)(int, int,  char*);
+	
+	
+	
+	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &bartlby_config,&from, &to)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string(bartlby_config);
+	convert_to_long(from);
+	convert_to_long(to);
+	
+	SOHandle=bartlby_get_sohandle(Z_STRVAL_P(bartlby_config));
+	if(SOHandle == NULL) {
+		php_error(E_WARNING, "bartlby SO error");	
+		RETURN_FALSE;	
+	}
+	
+	
+	LOAD_SYMBOL(WorkerChangeId,SOHandle, "WorkerChangeId");
+	
+	
+	
+	ret=WorkerChangeId(Z_LVAL_P(from),Z_LVAL_P(to),Z_STRVAL_P(bartlby_config));
+	
+	dlclose(SOHandle);
+	RETURN_LONG(ret);	
+}
+PHP_FUNCTION(bartlby_set_service_id) {
+	pval * bartlby_config;
+	pval * from;
+	pval * to;
+	pval * mig;
+	
+	void * SOHandle;
+	char * dlmsg;
+	
+	int ret;
+	
+	int (*ServiceChangeId)(int, int,  char*);
+	
+	
+	
+	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &bartlby_config,&from, &to)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string(bartlby_config);
+	convert_to_long(from);
+	convert_to_long(to);
+	
+	SOHandle=bartlby_get_sohandle(Z_STRVAL_P(bartlby_config));
+	if(SOHandle == NULL) {
+		php_error(E_WARNING, "bartlby SO error");	
+		RETURN_FALSE;	
+	}
+	
+	
+	LOAD_SYMBOL(ServiceChangeId,SOHandle, "ServiceChangeId");
+	
+	
+	
+	ret=ServiceChangeId(Z_LVAL_P(from),Z_LVAL_P(to),Z_STRVAL_P(bartlby_config));
+	
+	dlclose(SOHandle);
+	RETURN_LONG(ret);	
+}
+PHP_FUNCTION(bartlby_set_server_id) {
+	pval * bartlby_config;
+	pval * from;
+	pval * to;
+	pval * mig;
+	
+	void * SOHandle;
+	char * dlmsg;
+	
+	int ret;
+	
+	int (*ServerChangeId)(int, int, int, char*);
+	
+	
+	
+	if (ZEND_NUM_ARGS() != 4 || getParameters(ht, 4, &bartlby_config,&from, &to, &mig)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string(bartlby_config);
+	convert_to_long(from);
+	convert_to_long(to);
+	convert_to_long(mig);
+	
+	SOHandle=bartlby_get_sohandle(Z_STRVAL_P(bartlby_config));
+	if(SOHandle == NULL) {
+		php_error(E_WARNING, "bartlby SO error");	
+		RETURN_FALSE;	
+	}
+	
+	
+	LOAD_SYMBOL(ServerChangeId,SOHandle, "ServerChangeId");
+	
+	
+	
+	ret=ServerChangeId(Z_LVAL_P(from),Z_LVAL_P(to),Z_LVAL_P(mig),Z_STRVAL_P(bartlby_config));
+	
+	dlclose(SOHandle);
+	RETURN_LONG(ret);	
 }
 
 PHP_FUNCTION(bartlby_delete_downtime) {

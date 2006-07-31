@@ -105,7 +105,10 @@ PHP_FUNCTION(bartlby_check_force);
 PHP_FUNCTION(bartlby_event_tick);
 PHP_FUNCTION(bartlby_event_fetch);
 
-
+PHP_FUNCTION(bartlby_set_server_id);
+PHP_FUNCTION(bartlby_set_service_id);
+PHP_FUNCTION(bartlby_set_worker_id);
+PHP_FUNCTION(bartlby_set_downtime_id);
 PHP_FUNCTION(bartlby_set_passive);
 
 
