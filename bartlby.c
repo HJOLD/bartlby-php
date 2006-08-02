@@ -1241,7 +1241,9 @@ PHP_FUNCTION(bartlby_svc_map) {
 		
 		current_time=time(NULL);
 		for(x=0; x<shm_hdr->svccount; x++) {
-			
+			if(btl_is_array(svc_right_array, svcmap[x].service_id) == -1 &&  btl_is_array(server_right_array, svcmap[x].server_id) == -1) {
+				continue;	
+			}
 			ALLOC_INIT_ZVAL(subarray);
 			array_init(subarray);
 			add_assoc_long(subarray, "service_id", svcmap[x].service_id);
