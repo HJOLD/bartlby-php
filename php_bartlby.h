@@ -17,6 +17,8 @@
 
   $Id$ 
 */
+#define BARTLBY_PHP_EXT_VERSION "1.2.3"
+
 #define DT_SERVICE 1
 #define DT_SERVER 2
 
