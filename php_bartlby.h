@@ -173,6 +173,11 @@ struct snmpi {
 	int crit;
 	int type;
 };
+struct sprocess {
+	int start_time;
+	int pid;
+		
+};
 
 struct shm_header {
 	int size_of_structs;
@@ -234,7 +239,7 @@ struct service {
 	int service_retain;
 	int service_retain_current;
 	
-	int check_is_running;
+	
 	
 	struct perf_statistic pstat;
 	
@@ -243,6 +248,9 @@ struct service {
 	struct snmpi snmp_info;
 	
 	int recovery_outstanding; //Flag to see if recover is waiting
+	
+	struct sprocess process;
+	
 };
 
 struct worker {
@@ -281,3 +289,8 @@ struct btl_event {
 	int evnt_time;
 		
 }eb;
+struct ext_notify {
+	struct service * svc;	
+	struct worker * wrk;
+	char * trigger;
+} ty;

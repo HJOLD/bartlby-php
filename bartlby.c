@@ -1307,7 +1307,8 @@ PHP_FUNCTION(bartlby_svc_map) {
 			add_assoc_long(subarray, "service_ack", svcmap[x].service_ack);
 			add_assoc_long(subarray, "service_retain", svcmap[x].service_retain);
 			add_assoc_long(subarray, "service_retain_current", svcmap[x].service_retain_current);
-			add_assoc_long(subarray, "check_is_running", svcmap[x].check_is_running);
+			add_assoc_long(subarray, "check_is_running", svcmap[x].process.pid);
+			add_assoc_long(subarray, "check_starttime", svcmap[x].process.start_time);
 			
 			add_assoc_long(subarray, "shm_place", x);
 			
@@ -2443,7 +2444,8 @@ PHP_FUNCTION(bartlby_get_service) {
 		
 		add_assoc_long(return_value, "service_retain", svcmap[Z_LVAL_P(bartlby_service_id)].service_retain);
 		add_assoc_long(return_value, "service_retain_current", svcmap[Z_LVAL_P(bartlby_service_id)].service_retain_current);
-		add_assoc_long(return_value, "check_is_running", svcmap[Z_LVAL_P(bartlby_service_id)].check_is_running);
+		add_assoc_long(return_value, "check_is_running", svcmap[Z_LVAL_P(bartlby_service_id)].process.pid);
+		add_assoc_long(return_value, "check_starttime", svcmap[Z_LVAL_P(bartlby_service_id)].process.start_time);
 		
 		
 		add_assoc_long(return_value, "service_time_sum", svcmap[Z_LVAL_P(bartlby_service_id)].pstat.sum);
