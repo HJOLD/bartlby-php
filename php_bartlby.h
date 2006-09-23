@@ -17,7 +17,7 @@
 
   $Id$ 
 */
-#define BARTLBY_PHP_EXT_VERSION "1.2.3"
+#define BARTLBY_PHP_EXT_VERSION "1.2.3r2"
 
 #define DT_SERVICE 1
 #define DT_SERVER 2
@@ -251,6 +251,8 @@ struct service {
 	
 	struct sprocess process;
 	
+	int flap_seconds;
+	
 };
 
 struct worker {
@@ -269,6 +271,8 @@ struct worker {
 	char notify_levels[20];
 	char enabled_triggers[2048];
 	char t[500];
+	int escalation_limit;
+	int escalation_minutes;
 
 }sa;
 
