@@ -95,7 +95,9 @@ PHP_FUNCTION(bartlby_shm_destroy);
 
 
 PHP_FUNCTION(bartlby_toggle_service_notify);
+PHP_FUNCTION(bartlby_toggle_server_notify);
 PHP_FUNCTION(bartlby_toggle_service_active);
+PHP_FUNCTION(bartlby_toggle_server_active);
 PHP_FUNCTION(bartlby_toggle_sirene);
 
 PHP_FUNCTION(bartlby_ack_problem);
@@ -156,7 +158,8 @@ ZEND_END_MODULE_GLOBALS(bartlby)
 struct shm_counter {
 	int worker;
 	int services;
-	int downtimes;	
+	int downtimes;
+	int servers;	
 };
 
 struct perf_statistic {
@@ -183,6 +186,7 @@ struct shm_header {
 	int size_of_structs;
 	int svccount;
 	int wrkcount;
+	int srvcount;
 	int current_running;
 	char  version[50];
 	int do_reload;
@@ -194,6 +198,22 @@ struct shm_header {
 	int cur_event_index;
 	
 };
+
+struct server {
+	int server_id;
+	char  client_ip[2048];
+	char  server_name[2048];
+	char server_icon[1024];
+	int server_enabled;
+	int client_port;
+	int server_dead;
+	int server_notify;
+	int server_flap_seconds;
+	int flap_count;
+	int last_notify_send;
+	
+	
+} xxyz;
 
 struct service {
 	int service_id;
@@ -253,6 +273,9 @@ struct service {
 	
 	int flap_seconds;
 	
+	struct server * srv;
+	int srv_place;
+	
 };
 
 struct worker {
@@ -298,3 +321,4 @@ struct ext_notify {
 	struct worker * wrk;
 	char * trigger;
 } ty;
+

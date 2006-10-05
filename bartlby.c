@@ -77,7 +77,10 @@ function_entry bartlby_functions[] = {
 	PHP_FE(bartlby_delete_downtime, NULL)
 	
 	PHP_FE(bartlby_toggle_service_notify, NULL)
+	PHP_FE(bartlby_toggle_server_notify, NULL)
+	
 	PHP_FE(bartlby_toggle_service_active, NULL)
+	PHP_FE(bartlby_toggle_server_active, NULL)
 	
 	
 	PHP_FE(bartlby_toggle_sirene, NULL)
@@ -820,7 +823,7 @@ PHP_FUNCTION(bartlby_check_shm_size) {
 	bartlby_address=bartlby_get_shm(Z_STRVAL_P(bartlby_config)); 
 	if(bartlby_address != NULL) {
 		shm_hdr=(struct shm_header *)(void *)bartlby_address;
-		my_size=sizeof(struct shm_header)+sizeof(struct worker)+sizeof(struct service)+sizeof(struct downtime);
+		my_size=sizeof(struct shm_header)+ sizeof(struct server) + sizeof(struct worker)+sizeof(struct service)+sizeof(struct downtime);
 		if(my_size != shm_hdr->size_of_structs) {	
 			shmdt(bartlby_address);
 			RETURN_FALSE;
@@ -1070,6 +1073,164 @@ PHP_FUNCTION(bartlby_toggle_service_active) {
 	}	
 }
 
+//bartlby_toggle_server_notify
+
+PHP_FUNCTION(bartlby_toggle_server_notify) {
+	pval * bartlby_config;
+	pval * bartlby_service_id;
+	pval * do_writeback;
+	
+	char * shmtok;
+	int shm_id;
+	void * bartlby_address;
+	struct shm_header * shm_hdr;
+	int r;
+	void * SOHandle;
+	char * dlmsg;
+	
+	struct service * svcmap;
+	struct worker * wrkmap;
+	struct downtime * dtmap;
+	struct server * srvmap;
+		
+	int (*ModifyServer)(struct server *, char *);
+	
+	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &bartlby_config, &bartlby_service_id, &do_writeback)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_long(bartlby_service_id);
+	convert_to_long(do_writeback);
+	convert_to_string(bartlby_config);
+	
+	if (array_init(return_value) == FAILURE) {
+		RETURN_FALSE;
+	}
+	
+		
+	
+	SOHandle=bartlby_get_sohandle(Z_STRVAL_P(bartlby_config));
+	if(SOHandle == NULL) {
+		php_error(E_WARNING, "bartlby SO error");	
+		RETURN_FALSE;	
+	}
+	
+	bartlby_address=bartlby_get_shm(Z_STRVAL_P(bartlby_config)); 
+	if(bartlby_address != NULL) {
+		shm_hdr=(struct shm_header *)(void *)bartlby_address;
+		svcmap=(struct service *)(void *)bartlby_address+sizeof(struct shm_header);
+		wrkmap=(struct worker *)(void*)&svcmap[shm_hdr->svccount]+20;
+		dtmap=(struct downtime *)(void*)&wrkmap[shm_hdr->wrkcount]+20;
+		srvmap=(struct server *)(void*)&dtmap[shm_hdr->dtcount]+20;
+		
+		
+		if(Z_LVAL_P(bartlby_service_id) > shm_hdr->srvcount-1) {
+			php_error(E_WARNING, "Server id out of bounds");	
+			RETURN_FALSE;	
+		}
+		if(srvmap[Z_LVAL_P(bartlby_service_id)].server_notify == 1) {
+			srvmap[Z_LVAL_P(bartlby_service_id)].server_notify = 0;
+			r=0;
+		} else {
+			srvmap[Z_LVAL_P(bartlby_service_id)].server_notify = 1;	
+			r=1;
+		}
+		if(Z_LVAL_P(do_writeback) == 1) {
+			LOAD_SYMBOL(ModifyServer,SOHandle, "ModifyServer");
+			ModifyServer(&srvmap[Z_LVAL_P(bartlby_service_id)], Z_STRVAL_P(bartlby_config));
+		}
+		
+		dlclose(SOHandle);
+		shmdt(bartlby_address);
+		RETURN_LONG(r);
+		
+	
+	
+	} else {
+		php_error(E_WARNING, "SHM segment is not existing (bartlby running?)");	
+		free(shmtok);
+		RETURN_FALSE;
+	}	
+}
+
+
+
+PHP_FUNCTION(bartlby_toggle_server_active) {
+	pval * bartlby_config;
+	pval * bartlby_service_id;
+	pval * do_writeback;
+	
+	char * shmtok;
+	int shm_id;
+	void * bartlby_address;
+	struct shm_header * shm_hdr;
+	int r;
+	void * SOHandle;
+	char * dlmsg;
+	
+	struct service * svcmap;
+	struct worker * wrkmap;
+	struct downtime * dtmap;
+	struct server * srvmap;
+		
+	int (*ModifyServer)(struct server *, char *);
+	
+	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &bartlby_config, &bartlby_service_id, &do_writeback)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_long(bartlby_service_id);
+	convert_to_long(do_writeback);
+	convert_to_string(bartlby_config);
+	
+	if (array_init(return_value) == FAILURE) {
+		RETURN_FALSE;
+	}
+	
+		
+	
+	SOHandle=bartlby_get_sohandle(Z_STRVAL_P(bartlby_config));
+	if(SOHandle == NULL) {
+		php_error(E_WARNING, "bartlby SO error");	
+		RETURN_FALSE;	
+	}
+	
+	bartlby_address=bartlby_get_shm(Z_STRVAL_P(bartlby_config)); 
+	if(bartlby_address != NULL) {
+		shm_hdr=(struct shm_header *)(void *)bartlby_address;
+		svcmap=(struct service *)(void *)bartlby_address+sizeof(struct shm_header);
+		wrkmap=(struct worker *)(void*)&svcmap[shm_hdr->svccount]+20;
+		dtmap=(struct downtime *)(void*)&wrkmap[shm_hdr->wrkcount]+20;
+		srvmap=(struct server *)(void*)&dtmap[shm_hdr->dtcount]+20;
+		
+		
+		if(Z_LVAL_P(bartlby_service_id) > shm_hdr->srvcount-1) {
+			php_error(E_WARNING, "Server id out of bounds");	
+			RETURN_FALSE;	
+		}
+		if(srvmap[Z_LVAL_P(bartlby_service_id)].server_enabled == 1) {
+			srvmap[Z_LVAL_P(bartlby_service_id)].server_enabled = 0;
+			r=0;
+		} else {
+			srvmap[Z_LVAL_P(bartlby_service_id)].server_enabled = 1;	
+			r=1;
+		}
+		if(Z_LVAL_P(do_writeback) == 1) {
+			LOAD_SYMBOL(ModifyServer,SOHandle, "ModifyServer");
+			ModifyServer(&srvmap[Z_LVAL_P(bartlby_service_id)], Z_STRVAL_P(bartlby_config));
+		}
+		
+		dlclose(SOHandle);
+		shmdt(bartlby_address);
+		RETURN_LONG(r);
+		
+	
+	
+	} else {
+		php_error(E_WARNING, "SHM segment is not existing (bartlby running?)");	
+		free(shmtok);
+		RETURN_FALSE;
+	}	
+}
+
 PHP_FUNCTION(bartlby_toggle_service_notify) {
 	pval * bartlby_config;
 	pval * bartlby_service_id;
@@ -1241,6 +1402,7 @@ PHP_FUNCTION(bartlby_svc_map) {
 	struct service * svcmap;
 	struct worker * wrkmap;
 	struct downtime * dtmap;
+	struct server * srvmap;
 	
 	pval * bartlby_config;
 	pval * svc_right_array;
@@ -1262,6 +1424,7 @@ PHP_FUNCTION(bartlby_svc_map) {
 		svcmap=(struct service *)(void *)bartlby_address+sizeof(struct shm_header);
 		wrkmap=(struct worker *)(void*)&svcmap[shm_hdr->svccount]+20;
 		dtmap=(struct downtime *)(void*)&wrkmap[shm_hdr->wrkcount]+20;
+		srvmap=(struct server *)(void*)&dtmap[shm_hdr->dtcount]+20;
 		
 		current_time=time(NULL);
 		for(x=0; x<shm_hdr->svccount; x++) {
@@ -1327,6 +1490,12 @@ PHP_FUNCTION(bartlby_svc_map) {
 			add_assoc_long(subarray, "service_snmp_type",svcmap[x].snmp_info.type);
 			
 			add_assoc_long(subarray, "flap_seconds",svcmap[x].flap_seconds);
+			
+			add_assoc_long(subarray, "server_flap_seconds",srvmap[svcmap[x].srv_place].server_flap_seconds);
+			add_assoc_long(subarray, "server_last_notify_send",srvmap[svcmap[x].srv_place].last_notify_send);
+			add_assoc_long(subarray, "server_notify",srvmap[svcmap[x].srv_place].server_notify);
+			add_assoc_long(subarray, "server_enabled",srvmap[svcmap[x].srv_place].server_enabled);
+			
 			
 			
 			for(y=0; y<shm_hdr->dtcount; y++) {
@@ -1777,6 +1946,7 @@ PHP_FUNCTION(bartlby_get_info) {
 		shm_hdr=(struct shm_header *)(void *)bartlby_address;
 		
 		add_assoc_long(return_value, "services", shm_hdr->svccount);
+		
 		add_assoc_long(return_value, "workers", shm_hdr->wrkcount);
 		add_assoc_long(return_value, "current_running", shm_hdr->current_running);
 		add_assoc_long(return_value, "do_reload", shm_hdr->do_reload);
@@ -1786,7 +1956,7 @@ PHP_FUNCTION(bartlby_get_info) {
 		add_assoc_long(return_value, "startup_time", shm_hdr->startup_time);
 		add_assoc_long(return_value, "downtimes", shm_hdr->dtcount);
 		add_assoc_long(return_value, "sirene_mode", shm_hdr->sirene_mode);
-		
+		add_assoc_long(return_value, "servers", shm_hdr->srvcount);
 		add_assoc_long(return_value, "round_time_sum", shm_hdr->pstat.sum);
 		add_assoc_long(return_value, "round_time_count", shm_hdr->pstat.counter);
 		
@@ -2206,16 +2376,20 @@ PHP_FUNCTION(bartlby_add_server) {
 	pval * server_ip;
 	pval * server_port;
 	pval * server_icon;
+	pval * server_enabled;
+	pval * server_flap_seconds;
+	pval * server_notify;
+	
 	void * SOHandle;
 	char * dlmsg;
 	
 	int ret;
 	
-	int (*AddServer)(struct service *,char *);
+	int (*AddServer)(struct server *,char *);
 	
-	struct service svc;
+	struct server srv;
 	
-	if (ZEND_NUM_ARGS() != 5 || getParameters(ht, 5, &bartlby_config,&server_name, &server_ip, &server_port, &server_icon)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 8 || getParameters(ht, 8, &bartlby_config,&server_name, &server_ip, &server_port, &server_icon, &server_enabled, &server_notify, &server_flap_seconds)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(bartlby_config);
@@ -2223,6 +2397,9 @@ PHP_FUNCTION(bartlby_add_server) {
 	convert_to_string(server_ip);
 	convert_to_long(server_port);
 	convert_to_string(server_icon);
+	convert_to_long(server_enabled);
+	convert_to_long(server_flap_seconds);
+	convert_to_long(server_notify);
 	
 	SOHandle=bartlby_get_sohandle(Z_STRVAL_P(bartlby_config));
 	if(SOHandle == NULL) {
@@ -2233,12 +2410,15 @@ PHP_FUNCTION(bartlby_add_server) {
 	
 	LOAD_SYMBOL(AddServer,SOHandle, "AddServer");
 	
-	strcpy(svc.server_name, Z_STRVAL_P(server_name));
-	svc.client_port=Z_LVAL_P(server_port);
-	strcpy(svc.client_ip, Z_STRVAL_P(server_ip));
-	strcpy(svc.server_icon, Z_STRVAL_P(server_icon));
+	strcpy(srv.server_name, Z_STRVAL_P(server_name));
+	srv.client_port=Z_LVAL_P(server_port);
+	strcpy(srv.client_ip, Z_STRVAL_P(server_ip));
+	strcpy(srv.server_icon, Z_STRVAL_P(server_icon));
+	srv.server_enabled=Z_LVAL_P(server_enabled);
+	srv.server_flap_seconds=Z_LVAL_P(server_flap_seconds);
+	srv.server_notify=Z_LVAL_P(server_notify);
 	
-	ret=AddServer(&svc, Z_STRVAL_P(bartlby_config));
+	ret=AddServer(&srv, Z_STRVAL_P(bartlby_config));
 	
 	dlclose(SOHandle);
 	RETURN_LONG(ret);
@@ -2252,17 +2432,21 @@ PHP_FUNCTION(bartlby_modify_server) {
 	pval * server_port;
 	pval * server_id;
 	pval * server_icon;
+	pval * server_enabled;
+	pval * server_flap_seconds;
+	pval * server_notify;
+	
 	
 	void * SOHandle;
 	char * dlmsg;
 	
 	int ret;
 	
-	int (*ModifyServer)(struct service *,char *);
+	int (*ModifyServer)(struct server *,char *);
 	
-	struct service svc;
+	struct server srv;
 	
-	if (ZEND_NUM_ARGS() != 6 || getParameters(ht, 6, &bartlby_config,&server_id, &server_name, &server_ip, &server_port, &server_icon)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 9 || getParameters(ht, 9, &bartlby_config,&server_id, &server_name, &server_ip, &server_port, &server_icon, &server_enabled, &server_notify, &server_flap_seconds)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(bartlby_config);
@@ -2271,6 +2455,9 @@ PHP_FUNCTION(bartlby_modify_server) {
 	convert_to_long(server_port);
 	convert_to_long(server_id);
 	convert_to_string(server_icon);
+	convert_to_long(server_enabled);
+	convert_to_long(server_flap_seconds);
+	convert_to_long(server_notify);
 	
 	SOHandle=bartlby_get_sohandle(Z_STRVAL_P(bartlby_config));
 	if(SOHandle == NULL) {
@@ -2281,14 +2468,18 @@ PHP_FUNCTION(bartlby_modify_server) {
 	
 	LOAD_SYMBOL(ModifyServer,SOHandle, "ModifyServer");
 	
-	strcpy(svc.server_name, Z_STRVAL_P(server_name));
-	svc.client_port=Z_LVAL_P(server_port);
-	svc.server_id=Z_LVAL_P(server_id);
+	strcpy(srv.server_name, Z_STRVAL_P(server_name));
+	srv.client_port=Z_LVAL_P(server_port);
+	srv.server_id=Z_LVAL_P(server_id);
 	
-	strcpy(svc.client_ip, Z_STRVAL_P(server_ip));
-	strcpy(svc.server_icon, Z_STRVAL_P(server_icon));
+	strcpy(srv.client_ip, Z_STRVAL_P(server_ip));
+	strcpy(srv.server_icon, Z_STRVAL_P(server_icon));
+	srv.server_enabled=Z_LVAL_P(server_enabled);
+	srv.server_flap_seconds=Z_LVAL_P(server_flap_seconds);
+	srv.server_notify=Z_LVAL_P(server_notify);
 	
-	ret=ModifyServer(&svc, Z_STRVAL_P(bartlby_config));
+	
+	ret=ModifyServer(&srv, Z_STRVAL_P(bartlby_config));
 	
 	dlclose(SOHandle);
 	RETURN_LONG(ret);
@@ -2299,14 +2490,23 @@ PHP_FUNCTION(bartlby_get_server_by_id) {
 	
 	pval * server_id;
 	
+	char * shmtok;
 	void * SOHandle;
 	char * dlmsg;
+	struct shm_header * shm_hdr;
+	struct worker * wrkmap;
+	struct downtime * dtmap;
+	struct service * svcmap;
+	struct server * srvmap;
+	void * bartlby_address;
+	int x;
+	
 	
 	int ret;
 	
-	int (*GetServerById)(int,struct service *, char *);
+	int (*GetServerById)(int,struct server *, char *);
 	
-	struct service  svc;
+	struct server  svc;
 	
 	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &bartlby_config,&server_id)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2336,6 +2536,40 @@ PHP_FUNCTION(bartlby_get_server_by_id) {
 		add_assoc_string(return_value, "server_ip", svc.client_ip, 1);
 		add_assoc_string(return_value, "server_icon", svc.server_icon, 1);
 		add_assoc_long(return_value, "server_port",svc.client_port);
+		add_assoc_long(return_value, "server_id",Z_LVAL_P(server_id));
+		
+		
+		bartlby_address=bartlby_get_shm(Z_STRVAL_P(bartlby_config));
+		if(bartlby_address != NULL) {
+			shm_hdr=(struct shm_header *)(void *)bartlby_address;
+			svcmap=(struct service *)(void *)bartlby_address+sizeof(struct shm_header);
+			wrkmap=(struct worker *)(void*)&svcmap[shm_hdr->svccount]+20;
+			dtmap=(struct downtime *)(void *)&wrkmap[shm_hdr->wrkcount]+20;
+			srvmap=(struct server *)(void *)&dtmap[shm_hdr->dtcount]+20;
+			
+			for(x=0; x<shm_hdr->srvcount; x++) {
+				if(srvmap[x].server_id == Z_LVAL_P(server_id)) {
+					add_assoc_long(return_value, "server_enabled",srvmap[x].server_enabled);
+					add_assoc_long(return_value, "server_notify",srvmap[x].server_notify);
+					add_assoc_long(return_value, "server_flap_seconds",srvmap[x].server_flap_seconds);
+					add_assoc_long(return_value, "last_notify_send",srvmap[x].last_notify_send);
+					add_assoc_long(return_value, "server_shm_place",x);
+					break;
+				}			
+			}
+			
+			
+			
+			shmdt(bartlby_address);
+			
+       	
+		
+		} else {
+			php_error(E_WARNING, "SHM segment is not existing (bartlby running?)");	
+			free(shmtok);
+			RETURN_FALSE;
+		}
+		
 			
 	}
 	dlclose(SOHandle);
@@ -2400,6 +2634,7 @@ PHP_FUNCTION(bartlby_get_service) {
 	struct service * svcmap;
 	struct worker * wrkmap;
 	struct downtime * dtmap;
+	struct server * srvmap;
 	
 	pval * bartlby_config;
 	pval * bartlby_service_id;
@@ -2424,7 +2659,7 @@ PHP_FUNCTION(bartlby_get_service) {
 		svcmap=(struct service *)(void *)bartlby_address+sizeof(struct shm_header);
 		wrkmap=(struct worker *)(void*)&svcmap[shm_hdr->svccount]+20;
 		dtmap=(struct downtime *)(void*)&wrkmap[shm_hdr->wrkcount]+20;
-		
+		srvmap=(struct server *)(void*)&dtmap[shm_hdr->dtcount]+20;
 		
 		if(Z_LVAL_P(bartlby_service_id) > shm_hdr->svccount-1) {
 			php_error(E_WARNING, "Service id out of bounds");	
@@ -2488,6 +2723,12 @@ PHP_FUNCTION(bartlby_get_service) {
 		add_assoc_long(return_value, "service_snmp_type", svcmap[Z_LVAL_P(bartlby_service_id)].snmp_info.type);
 		
 		add_assoc_long(return_value, "flap_seconds", svcmap[Z_LVAL_P(bartlby_service_id)].flap_seconds);
+		
+		add_assoc_long(return_value, "server_flap_seconds",srvmap[svcmap[Z_LVAL_P(bartlby_service_id)].srv_place].server_flap_seconds);
+		add_assoc_long(return_value, "server_last_notify_send",srvmap[svcmap[Z_LVAL_P(bartlby_service_id)].srv_place].last_notify_send);
+		add_assoc_long(return_value, "server_notify",srvmap[svcmap[Z_LVAL_P(bartlby_service_id)].srv_place].server_notify);
+		add_assoc_long(return_value, "server_enabled",srvmap[svcmap[Z_LVAL_P(bartlby_service_id)].srv_place].server_enabled);
+			
 		
 		//Downtime 060120
 		is_down=0;
