@@ -756,7 +756,7 @@ PHP_FUNCTION(bartlby_event_fetch) {
 	struct worker * wrkmap;
 	struct downtime * dtmap;
 	struct btl_event * evntmap;
-		
+	struct server * srvmap;	
 	
 	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &bartlby_config, &event_index)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -778,7 +778,9 @@ PHP_FUNCTION(bartlby_event_fetch) {
 		svcmap=(struct service *)(void *)bartlby_address+sizeof(struct shm_header);
 		wrkmap=(struct worker *)(void*)&svcmap[shm_hdr->svccount]+20;
 		dtmap=(struct downtime *)(void*)&wrkmap[shm_hdr->wrkcount]+20;
-		evntmap=(struct btl_event *)(void *)&dtmap[shm_hdr->dtcount]+20;
+		srvmap=(struct server *)(void*)&dtmap[shm_hdr->dtcount]+20;
+		evntmap=(struct btl_event *)(void *)&srvmap[shm_hdr->srvcount]+20;
+		
 		if(Z_LVAL_P(event_index) < EVENT_QUEUE_MAX) {
 			add_assoc_string(return_value, "message", evntmap[Z_LVAL_P(event_index)].evnt_message, 1);
 			add_assoc_long(return_value, "id", evntmap[Z_LVAL_P(event_index)].evnt_id);
