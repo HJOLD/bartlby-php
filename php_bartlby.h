@@ -262,6 +262,7 @@ struct service {
 	
 	
 	struct perf_statistic pstat;
+	struct perf_statistic delay_time;
 	
 	int do_force;
 	

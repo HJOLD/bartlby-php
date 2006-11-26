@@ -1480,6 +1480,8 @@ PHP_FUNCTION(bartlby_svc_map) {
 			add_assoc_long(subarray, "service_time_sum", svcmap[x].pstat.sum);
 			add_assoc_long(subarray, "service_time_count",svcmap[x].pstat.counter);
 		
+			add_assoc_long(subarray, "service_delay_sum", svcmap[x].delay_time.sum);
+			add_assoc_long(subarray, "service_delay_count",svcmap[x].delay_time.counter);
 			
 			//bartlby_get_service_by_id
 			
@@ -2711,6 +2713,9 @@ PHP_FUNCTION(bartlby_get_service) {
 		
 		add_assoc_long(return_value, "service_time_sum", svcmap[Z_LVAL_P(bartlby_service_id)].pstat.sum);
 		add_assoc_long(return_value, "service_time_count",svcmap[Z_LVAL_P(bartlby_service_id)].pstat.counter);
+		
+		add_assoc_long(return_value, "service_delay_sum", svcmap[Z_LVAL_P(bartlby_service_id)].delay_time.sum);
+		add_assoc_long(return_value, "service_delay_count",svcmap[Z_LVAL_P(bartlby_service_id)].delay_time.counter);
 		
 		
 		add_assoc_string(return_value, "service_var",  svcmap[Z_LVAL_P(bartlby_service_id)].service_var, 1);
