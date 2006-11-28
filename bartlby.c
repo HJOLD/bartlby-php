@@ -1449,6 +1449,7 @@ PHP_FUNCTION(bartlby_svc_map) {
 			add_assoc_string(subarray, "plugin_arguments", svcmap[x].plugin_arguments, 1);
 			
 			add_assoc_long(subarray, "check_interval", svcmap[x].check_interval);
+			add_assoc_long(subarray, "check_interval_original", svcmap[x].check_interval_original);
 			add_assoc_long(subarray, "last_check", svcmap[x].last_check);
 			
 			add_assoc_long(subarray, "hour_from", svcmap[x].hour_from);
@@ -2064,6 +2065,7 @@ PHP_FUNCTION(bartlby_get_service_by_id) {
 		add_assoc_string(return_value, "plugin_arguments", svc.plugin_arguments, 1);
 		
 		add_assoc_long(return_value, "check_interval", svc.check_interval);
+		add_assoc_long(return_value, "check_interval_original", svc.check_interval_original);
 		add_assoc_long(return_value, "last_check", svc.last_check);
 		
 		add_assoc_long(return_value, "hour_from", svc.hour_from);
@@ -2683,6 +2685,7 @@ PHP_FUNCTION(bartlby_get_service) {
 		add_assoc_string(return_value, "plugin_arguments", svcmap[Z_LVAL_P(bartlby_service_id)].plugin_arguments, 1);
 		
 		add_assoc_long(return_value, "check_interval", svcmap[Z_LVAL_P(bartlby_service_id)].check_interval);
+		add_assoc_long(return_value, "check_interval_original", svcmap[Z_LVAL_P(bartlby_service_id)].check_interval_original);
 		add_assoc_long(return_value, "last_check", svcmap[Z_LVAL_P(bartlby_service_id)].last_check);
 		
 		add_assoc_long(return_value, "hour_from", svcmap[Z_LVAL_P(bartlby_service_id)].hour_from);
