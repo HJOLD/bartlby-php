@@ -17,7 +17,8 @@
 
   $Id$ 
 */
-#define BARTLBY_PHP_EXT_VERSION "1.2.3r2"
+#define BARTLBY_VERSION "1.2.6"
+
 
 #define DT_SERVICE 1
 #define DT_SERVER 2
@@ -48,7 +49,7 @@ extern zend_module_entry bartlby_module_entry;
     	}
     	
 
-#define BARTLBY_VERSION "0.9.8"
+
 #define EVENT_QUEUE_MAX 128
 
 

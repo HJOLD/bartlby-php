@@ -305,7 +305,7 @@ PHP_MINFO_FUNCTION(bartlby)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "bartlby support", "enabled");
-	php_info_print_table_row(2, "php-ext version", BARTLBY_PHP_EXT_VERSION);
+	php_info_print_table_row(2, "php-ext version", BARTLBY_VERSION);
 	php_info_print_table_end();
 
 	/* Remove comments if you have entries in php.ini
