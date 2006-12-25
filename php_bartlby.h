@@ -155,7 +155,7 @@ ZEND_END_MODULE_GLOBALS(bartlby)
  * indent-tabs-mode: t
  * End:
  */
-
+ 
 struct shm_counter {
 	int worker;
 	int services;
@@ -183,8 +183,18 @@ struct sprocess {
 		
 };
 
+struct sched_threads {
+	int pid;
+	struct service * svc;
+	int start_time;
+	int its_over;
+} astt;
+
+
+
 struct shm_header {
 	int size_of_structs;
+	int thrdcount;
 	int svccount;
 	int wrkcount;
 	int srvcount;
@@ -197,6 +207,7 @@ struct shm_header {
 	int sirene_mode;
 	struct perf_statistic pstat;
 	int cur_event_index;
+	
 	
 };
 
@@ -213,8 +224,9 @@ struct server {
 	int flap_count;
 	int last_notify_send;
 	
-	
 } xxyz;
+
+
 
 struct service {
 	int service_id;
@@ -281,6 +293,11 @@ struct service {
 	
 };
 
+struct service_sort {
+	struct service * svc;	
+};
+
+
 struct worker {
 	char name[2048];
 	char  mail[2048];
@@ -324,4 +341,33 @@ struct ext_notify {
 	struct worker * wrk;
 	char * trigger;
 } ty;
+
+
+
+typedef struct v2_packet_struct{
+
+	u_int32_t crc32_value;
+	int16_t   exit_code;
+	int16_t   packet_type;
+	char      output[2048];
+	char      cmdline[2048];
+	char      plugin[2048];
+	char 	   perf_handler[1024];
+	
+	 
+} agent_v2_packet;
+
+typedef struct port_packet_struct{
+
+	u_int32_t crc32_value;
+	int16_t   exit_code;
+	int16_t   packet_type;
+	char      output[2048];
+	char      cmdline[2048];
+	char      plugin[2048];
+	char 	   perf_handler[1024];
+	int32_t	   service_id;
+	
+	 
+} portier_packet;
 
