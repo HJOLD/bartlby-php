@@ -244,6 +244,7 @@ struct service {
 	int check_interval_original;
 	int last_check;
 	
+	
 	/*Time stuff*/
 	
 	int hour_from;
