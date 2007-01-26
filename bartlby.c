@@ -1452,10 +1452,7 @@ PHP_FUNCTION(bartlby_svc_map) {
 			add_assoc_long(subarray, "check_interval_original", svcmap[x].check_interval_original);
 			add_assoc_long(subarray, "last_check", svcmap[x].last_check);
 			
-			add_assoc_long(subarray, "hour_from", svcmap[x].hour_from);
-			add_assoc_long(subarray, "min_from", svcmap[x].min_from);
-			add_assoc_long(subarray, "hour_to", svcmap[x].hour_to);
-			add_assoc_long(subarray, "min_to", svcmap[x].min_to);
+			add_assoc_string(subarray, "exec_plan", svcmap[x].service_exec_plan, 1);
 			
 			add_assoc_long(subarray, "notify_enabled", svcmap[x].notify_enabled);
 			add_assoc_long(subarray, "last_notify_send", svcmap[x].last_notify_send);
@@ -2068,10 +2065,8 @@ PHP_FUNCTION(bartlby_get_service_by_id) {
 		add_assoc_long(return_value, "check_interval_original", svc.check_interval_original);
 		add_assoc_long(return_value, "last_check", svc.last_check);
 		
-		add_assoc_long(return_value, "hour_from", svc.hour_from);
-		add_assoc_long(return_value, "min_from", svc.min_from);
-		add_assoc_long(return_value, "hour_to", svc.hour_to);
-		add_assoc_long(return_value, "min_to", svc.min_to);
+		
+		add_assoc_string(return_value, "exec_plan", svc.service_exec_plan, 1);
 		
 		add_assoc_long(return_value, "notify_enabled", svc.notify_enabled);
 		add_assoc_long(return_value, "last_notify_send", svc.last_notify_send);
@@ -2152,7 +2147,7 @@ PHP_FUNCTION(bartlby_modify_service) {
 	
 	int (*UpdateService)(struct service *, char *);
 	
-	pval *service_id, * server_id , * bartlby_config, * plugin, * service_name , * plugin_arguments, * notify_enabled, * hour_from, * hour_to, *min_from, *min_to, *check_interval, *service_type, *service_passive_timeout, *service_var, *service_check_timeout, * service_ack, * service_retain;
+	pval *service_id, * server_id , * bartlby_config, * plugin, * service_name , * plugin_arguments, * notify_enabled, *exec_plan, *check_interval, *service_type, *service_passive_timeout, *service_var, *service_check_timeout, * service_ack, * service_retain;
 	pval * snmp_community, * snmp_objid, *snmp_version, *snmp_warning, *snmp_critical, *snmp_type;
 	pval * service_active;
 	pval * flap_seconds;
@@ -2172,7 +2167,7 @@ PHP_FUNCTION(bartlby_modify_service) {
 	svc->service_passive_timeout
 	*/
 	
-	if(ZEND_NUM_ARGS() != 26 || getParameters(ht, 26, &bartlby_config,&service_id,  &server_id, &plugin,&service_name,&plugin_arguments,&notify_enabled,&hour_from,&hour_to,&min_from,&min_to,&check_interval, &service_type,&service_var,&service_passive_timeout,&service_check_timeout, &service_ack, &service_retain, &snmp_community, &snmp_objid, &snmp_version, &snmp_warning, &snmp_critical, &snmp_type, &service_active, &flap_seconds) == FAILURE) {
+	if(ZEND_NUM_ARGS() != 23 || getParameters(ht, 23, &bartlby_config,&service_id,  &server_id, &plugin,&service_name,&plugin_arguments,&notify_enabled,&exec_plan,&check_interval, &service_type,&service_var,&service_passive_timeout,&service_check_timeout, &service_ack, &service_retain, &snmp_community, &snmp_objid, &snmp_version, &snmp_warning, &snmp_critical, &snmp_type, &service_active, &flap_seconds) == FAILURE) {
 		WRONG_PARAM_COUNT;	
 	}
 	convert_to_string(bartlby_config);
@@ -2184,10 +2179,7 @@ PHP_FUNCTION(bartlby_modify_service) {
 	convert_to_long(server_id);
 	convert_to_long(service_check_timeout);
 	
-	convert_to_long(hour_from);
-	convert_to_long(hour_to);
-	convert_to_long(min_from);
-	convert_to_long(min_to);
+	
 	convert_to_long(check_interval);
 	convert_to_long(service_type);
 	convert_to_long(service_passive_timeout);
@@ -2206,16 +2198,18 @@ PHP_FUNCTION(bartlby_modify_service) {
 	
 	convert_to_long(flap_seconds);
 	
+	convert_to_string(exec_plan);
+	
 	svc.service_id=Z_LVAL_P(service_id);
 	sprintf(svc.plugin, "%s", Z_STRVAL_P(plugin));
 	sprintf(svc.service_name, "%s", Z_STRVAL_P(service_name));
 	sprintf(svc.plugin_arguments, "%s", Z_STRVAL_P(plugin_arguments));
+	
+	sprintf(svc.service_exec_plan, "%s", Z_STRVAL_P(exec_plan));
+	
 	svc.notify_enabled=Z_LVAL_P(notify_enabled);
 	
-	svc.hour_from=Z_LVAL_P(hour_from);
-	svc.hour_to=Z_LVAL_P(hour_to);
-	svc.min_from=Z_LVAL_P(min_from);
-	svc.min_to=Z_LVAL_P(min_to);
+	
 	svc.server_id=Z_LVAL_P(server_id);
 	svc.service_ack=Z_LVAL_P(service_ack);
 	svc.service_retain=Z_LVAL_P(service_retain);
@@ -2268,7 +2262,7 @@ PHP_FUNCTION(bartlby_add_service) {
 	
 	int (*AddService)(struct service *, char *);
 	
-	pval * server_id , * bartlby_config, * plugin, * service_name , * plugin_arguments, * notify_enabled, * hour_from, * hour_to, *min_from, *min_to, *check_interval, *service_type, *service_passive_timeout, *service_var, * service_check_timeout, * service_ack, * service_retain;
+	pval * server_id , * bartlby_config, * plugin, * service_name , * plugin_arguments, * notify_enabled, *exec_plan, *check_interval, *service_type, *service_passive_timeout, *service_var, * service_check_timeout, * service_ack, * service_retain;
 	pval * snmp_community, * snmp_objid, *snmp_version, *snmp_warning, *snmp_critical, *snmp_type;
 	pval * service_active;
 	pval * flap_seconds;
@@ -2291,7 +2285,7 @@ PHP_FUNCTION(bartlby_add_service) {
 	svc->service_ack
 	*/
 	
-	if(ZEND_NUM_ARGS() != 25 || getParameters(ht, 25, &bartlby_config, &server_id, &plugin,&service_name,&plugin_arguments,&notify_enabled,&hour_from,&hour_to,&min_from,&min_to,&check_interval, &service_type,&service_var,&service_passive_timeout, &service_check_timeout, &service_ack, &service_retain, &snmp_community, &snmp_objid, &snmp_version, &snmp_warning, &snmp_critical, &snmp_type, &service_active, &flap_seconds) == FAILURE) {
+	if(ZEND_NUM_ARGS() != 22 || getParameters(ht, 22, &bartlby_config, &server_id, &plugin,&service_name,&plugin_arguments,&notify_enabled,&exec_plan,&check_interval, &service_type,&service_var,&service_passive_timeout, &service_check_timeout, &service_ack, &service_retain, &snmp_community, &snmp_objid, &snmp_version, &snmp_warning, &snmp_critical, &snmp_type, &service_active, &flap_seconds) == FAILURE) {
 		WRONG_PARAM_COUNT;	
 	}
 	convert_to_string(bartlby_config);
@@ -2299,16 +2293,14 @@ PHP_FUNCTION(bartlby_add_service) {
 	convert_to_string(service_name);
 	convert_to_string(plugin_arguments);
 	convert_to_long(notify_enabled);
-	convert_to_long(hour_from);
-	convert_to_long(hour_to);
-	convert_to_long(min_from);
-	convert_to_long(min_to);
+	
 	convert_to_long(check_interval);
 	convert_to_long(service_type);
 	convert_to_long(service_passive_timeout);
 	convert_to_long(server_id);
 	convert_to_long(service_check_timeout);
 	convert_to_string(service_var);
+	convert_to_string(exec_plan);
 	convert_to_long(service_ack);
 	convert_to_long(service_retain);
 	convert_to_long(service_active);
@@ -2324,6 +2316,8 @@ PHP_FUNCTION(bartlby_add_service) {
 	
 	
 	sprintf(svc.plugin, "%s", Z_STRVAL_P(plugin));
+	sprintf(svc.service_exec_plan, "%s", Z_STRVAL_P(exec_plan));
+	
 	sprintf(svc.service_name, "%s", Z_STRVAL_P(service_name));
 	sprintf(svc.plugin_arguments, "%s", Z_STRVAL_P(plugin_arguments));
 	svc.notify_enabled=Z_LVAL_P(notify_enabled);
@@ -2335,10 +2329,7 @@ PHP_FUNCTION(bartlby_add_service) {
 	svc.flap_seconds=Z_LVAL_P(flap_seconds);
 	
 	
-	svc.hour_from=Z_LVAL_P(hour_from);
-	svc.hour_to=Z_LVAL_P(hour_to);
-	svc.min_from=Z_LVAL_P(min_from);
-	svc.min_to=Z_LVAL_P(min_to);
+	
 	
 	svc.service_check_timeout=Z_LVAL_P(service_check_timeout);
 	
@@ -2688,10 +2679,8 @@ PHP_FUNCTION(bartlby_get_service) {
 		add_assoc_long(return_value, "check_interval_original", svcmap[Z_LVAL_P(bartlby_service_id)].check_interval_original);
 		add_assoc_long(return_value, "last_check", svcmap[Z_LVAL_P(bartlby_service_id)].last_check);
 		
-		add_assoc_long(return_value, "hour_from", svcmap[Z_LVAL_P(bartlby_service_id)].hour_from);
-		add_assoc_long(return_value, "min_from", svcmap[Z_LVAL_P(bartlby_service_id)].min_from);
-		add_assoc_long(return_value, "hour_to", svcmap[Z_LVAL_P(bartlby_service_id)].hour_to);
-		add_assoc_long(return_value, "min_to", svcmap[Z_LVAL_P(bartlby_service_id)].min_to);
+		
+		add_assoc_string(return_value, "exec_plan", svcmap[Z_LVAL_P(bartlby_service_id)].service_exec_plan, 1);
 		
 		add_assoc_long(return_value, "notify_enabled", svcmap[Z_LVAL_P(bartlby_service_id)].notify_enabled);
 		add_assoc_long(return_value, "last_notify_send", svcmap[Z_LVAL_P(bartlby_service_id)].last_notify_send);

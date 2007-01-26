@@ -17,7 +17,7 @@
 
   $Id$ 
 */
-#define BARTLBY_VERSION "1.2.6"
+#define BARTLBY_VERSION "1.2.8"
 
 
 #define DT_SERVICE 1
@@ -247,10 +247,7 @@ struct service {
 	
 	/*Time stuff*/
 	
-	int hour_from;
-	int min_from;
-	int hour_to;
-	int min_to;
+	char service_exec_plan[2048];
 	
 	/*Notify things*/
 	int notify_enabled;
