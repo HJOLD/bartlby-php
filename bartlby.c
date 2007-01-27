@@ -1681,6 +1681,7 @@ PHP_FUNCTION(bartlby_add_worker) {
 	pval * enabled_triggers;
 	pval * escalation_limit;
 	pval * escalation_minutes;
+	pval * notify_plan;
 	
 	void * SOHandle;
 	char * dlmsg;
@@ -1691,7 +1692,7 @@ PHP_FUNCTION(bartlby_add_worker) {
 	
 	struct worker svc;
 	
-	if (ZEND_NUM_ARGS() != 11 || getParameters(ht, 11, &bartlby_config,&mail, &icq, &services, &notify_levels, &active, &name, &password, &enabled_triggers, &escalation_limit, &escalation_minutes)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 12 || getParameters(ht, 12, &bartlby_config,&mail, &icq, &services, &notify_levels, &active, &name, &password, &enabled_triggers, &escalation_limit, &escalation_minutes, &notify_plan)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(enabled_triggers);
@@ -1703,6 +1704,7 @@ PHP_FUNCTION(bartlby_add_worker) {
 	convert_to_string(notify_levels);
 	convert_to_string(name);
 	convert_to_long(active);
+	convert_to_string(notify_plan);
 	
 	convert_to_long(escalation_limit);
 	convert_to_long(escalation_minutes);
@@ -1718,6 +1720,9 @@ PHP_FUNCTION(bartlby_add_worker) {
 	
 	strcpy(svc.password, Z_STRVAL_P(password));
 	strcpy(svc.name, Z_STRVAL_P(name));
+	
+	strcpy(svc.notify_plan, Z_STRVAL_P(notify_plan));
+	
 	strcpy(svc.mail, Z_STRVAL_P(mail));
 	strcpy(svc.icq, Z_STRVAL_P(icq));
 	strcpy(svc.services, Z_STRVAL_P(services));
@@ -1783,6 +1788,7 @@ PHP_FUNCTION(bartlby_modify_worker) {
 	pval * enabled_triggers;
 	pval * escalation_limit;
 	pval * escalation_minutes;
+	pval * notify_plan;
 	
 	
 	void * SOHandle;
@@ -1794,7 +1800,7 @@ PHP_FUNCTION(bartlby_modify_worker) {
 	
 	struct worker svc;
 	
-	if (ZEND_NUM_ARGS() != 12 || getParameters(ht, 12, &bartlby_config,&worker_id, &mail, &icq, &services, &notify_levels, &active, &name, &password, &enabled_triggers, &escalation_limit, &escalation_minutes)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 13 || getParameters(ht, 13, &bartlby_config,&worker_id, &mail, &icq, &services, &notify_levels, &active, &name, &password, &enabled_triggers, &escalation_limit, &escalation_minutes, &notify_plan)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(enabled_triggers);
@@ -1806,6 +1812,8 @@ PHP_FUNCTION(bartlby_modify_worker) {
 	convert_to_string(notify_levels);
 	convert_to_string(name);
 	convert_to_long(active);
+	convert_to_string(notify_plan);
+	
 	convert_to_long(worker_id);
 	convert_to_long(escalation_limit);
 	convert_to_long(escalation_minutes);
@@ -1819,6 +1827,7 @@ PHP_FUNCTION(bartlby_modify_worker) {
 	
 	LOAD_SYMBOL(UpdateWorker,SOHandle, "UpdateWorker");
 	
+	strcpy(svc.notify_plan, Z_STRVAL_P(notify_plan));
 	strcpy(svc.password, Z_STRVAL_P(password));
 	strcpy(svc.name, Z_STRVAL_P(name));
 	strcpy(svc.mail, Z_STRVAL_P(mail));
@@ -1879,6 +1888,7 @@ PHP_FUNCTION(bartlby_get_worker_by_id) {
 		}
 		add_assoc_string(return_value, "mail", svc.mail, 1);
 		add_assoc_string(return_value, "icq", svc.icq, 1);
+		add_assoc_string(return_value, "notify_plan", svc.notify_plan, 1);
 		add_assoc_string(return_value, "services", svc.services, 1);
 		
 		
@@ -2843,6 +2853,7 @@ PHP_FUNCTION(bartlby_get_worker) {
 		
 		add_assoc_string(return_value, "mail", wrkmap[Z_LVAL_P(bartlby_worker_id)].mail, 1);
 		add_assoc_string(return_value, "icq", wrkmap[Z_LVAL_P(bartlby_worker_id)].icq, 1);
+		add_assoc_string(return_value, "notify_plan", wrkmap[Z_LVAL_P(bartlby_worker_id)].notify_plan, 1);
 		add_assoc_string(return_value, "services", wrkmap[Z_LVAL_P(bartlby_worker_id)].services, 1);
 		
 		add_assoc_string(return_value, "notify_levels", wrkmap[Z_LVAL_P(bartlby_worker_id)].notify_levels,1);

@@ -304,7 +304,7 @@ struct worker {
 	
 	int worker_id;
 	int active;
-	
+	char notify_plan[2048];	
 	char password[2048];
 	
 	int escalation_count;
