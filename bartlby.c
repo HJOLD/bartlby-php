@@ -1400,6 +1400,7 @@ PHP_FUNCTION(bartlby_svc_map) {
 	int y;
 	int is_down;
 	int current_time;
+	int current_state;
 	
 	struct service * svcmap;
 	struct worker * wrkmap;
@@ -1438,7 +1439,16 @@ PHP_FUNCTION(bartlby_svc_map) {
 			add_assoc_long(subarray, "service_id", svcmap[x].service_id);
 			add_assoc_long(subarray, "server_id", svcmap[x].server_id);
 			add_assoc_long(subarray, "last_state", svcmap[x].last_state);
-			add_assoc_long(subarray, "current_state", svcmap[x].current_state);
+			
+			
+			if(svcmap[x].is_server_dead < 0) {
+				add_assoc_long(subarray, "current_state", -3);
+				add_assoc_long(subarray, "server_is_dead", 1);
+			} else {
+				add_assoc_long(subarray, "current_state", svcmap[x].current_state);
+			}
+			
+			
 			add_assoc_long(subarray, "client_port", svcmap[x].client_port);
 					
 			add_assoc_string(subarray, "new_server_text", svcmap[x].new_server_text, 1);
@@ -2684,7 +2694,17 @@ PHP_FUNCTION(bartlby_get_service) {
 		add_assoc_long(return_value, "service_id", svcmap[Z_LVAL_P(bartlby_service_id)].service_id);
 		add_assoc_long(return_value, "server_id", svcmap[Z_LVAL_P(bartlby_service_id)].server_id);
 		add_assoc_long(return_value, "last_state", svcmap[Z_LVAL_P(bartlby_service_id)].last_state);
-		add_assoc_long(return_value, "current_state", svcmap[Z_LVAL_P(bartlby_service_id)].current_state);
+		
+		
+		if(svcmap[Z_LVAL_P(bartlby_service_id)].is_server_dead < 0) {
+			add_assoc_long(return_value, "current_state", -3);
+			add_assoc_long(return_value, "server_is_dead", 1);
+		} else {
+			add_assoc_long(return_value, "current_state", svcmap[Z_LVAL_P(bartlby_service_id)].current_state);
+		}
+		
+		
+		
 		add_assoc_long(return_value, "client_port", svcmap[Z_LVAL_P(bartlby_service_id)].client_port);
 				
 		add_assoc_string(return_value, "new_server_text", svcmap[Z_LVAL_P(bartlby_service_id)].new_server_text, 1);

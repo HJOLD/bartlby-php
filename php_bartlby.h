@@ -289,6 +289,7 @@ struct service {
 	
 	struct server * srv;
 	int srv_place;
+	int is_server_dead;
 	
 };
 
