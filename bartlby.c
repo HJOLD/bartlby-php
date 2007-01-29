@@ -1497,6 +1497,7 @@ PHP_FUNCTION(bartlby_svc_map) {
 			add_assoc_long(subarray, "server_last_notify_send",srvmap[svcmap[x].srv_place].last_notify_send);
 			add_assoc_long(subarray, "server_notify",srvmap[svcmap[x].srv_place].server_notify);
 			add_assoc_long(subarray, "server_enabled",srvmap[svcmap[x].srv_place].server_enabled);
+			add_assoc_long(subarray, "server_dead",srvmap[svcmap[x].srv_place].server_dead);
 			
 			
 			
@@ -2386,6 +2387,7 @@ PHP_FUNCTION(bartlby_add_server) {
 	pval * server_enabled;
 	pval * server_flap_seconds;
 	pval * server_notify;
+	pval * server_dead;
 	
 	void * SOHandle;
 	char * dlmsg;
@@ -2396,7 +2398,7 @@ PHP_FUNCTION(bartlby_add_server) {
 	
 	struct server srv;
 	
-	if (ZEND_NUM_ARGS() != 8 || getParameters(ht, 8, &bartlby_config,&server_name, &server_ip, &server_port, &server_icon, &server_enabled, &server_notify, &server_flap_seconds)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 9 || getParameters(ht, 9, &bartlby_config,&server_name, &server_ip, &server_port, &server_icon, &server_enabled, &server_notify, &server_flap_seconds, &server_dead)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(bartlby_config);
@@ -2407,6 +2409,7 @@ PHP_FUNCTION(bartlby_add_server) {
 	convert_to_long(server_enabled);
 	convert_to_long(server_flap_seconds);
 	convert_to_long(server_notify);
+	convert_to_long(server_dead);
 	
 	SOHandle=bartlby_get_sohandle(Z_STRVAL_P(bartlby_config));
 	if(SOHandle == NULL) {
@@ -2424,6 +2427,7 @@ PHP_FUNCTION(bartlby_add_server) {
 	srv.server_enabled=Z_LVAL_P(server_enabled);
 	srv.server_flap_seconds=Z_LVAL_P(server_flap_seconds);
 	srv.server_notify=Z_LVAL_P(server_notify);
+	srv.server_dead=Z_LVAL_P(server_dead);
 	
 	ret=AddServer(&srv, Z_STRVAL_P(bartlby_config));
 	
@@ -2442,6 +2446,7 @@ PHP_FUNCTION(bartlby_modify_server) {
 	pval * server_enabled;
 	pval * server_flap_seconds;
 	pval * server_notify;
+	pval * server_dead;
 	
 	
 	void * SOHandle;
@@ -2453,7 +2458,7 @@ PHP_FUNCTION(bartlby_modify_server) {
 	
 	struct server srv;
 	
-	if (ZEND_NUM_ARGS() != 9 || getParameters(ht, 9, &bartlby_config,&server_id, &server_name, &server_ip, &server_port, &server_icon, &server_enabled, &server_notify, &server_flap_seconds)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 10 || getParameters(ht, 10, &bartlby_config,&server_id, &server_name, &server_ip, &server_port, &server_icon, &server_enabled, &server_notify, &server_flap_seconds, &server_dead)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(bartlby_config);
@@ -2465,6 +2470,7 @@ PHP_FUNCTION(bartlby_modify_server) {
 	convert_to_long(server_enabled);
 	convert_to_long(server_flap_seconds);
 	convert_to_long(server_notify);
+	convert_to_long(server_dead);
 	
 	SOHandle=bartlby_get_sohandle(Z_STRVAL_P(bartlby_config));
 	if(SOHandle == NULL) {
@@ -2484,6 +2490,8 @@ PHP_FUNCTION(bartlby_modify_server) {
 	srv.server_enabled=Z_LVAL_P(server_enabled);
 	srv.server_flap_seconds=Z_LVAL_P(server_flap_seconds);
 	srv.server_notify=Z_LVAL_P(server_notify);
+	
+	srv.server_dead=Z_LVAL_P(server_dead);
 	
 	
 	ret=ModifyServer(&srv, Z_STRVAL_P(bartlby_config));
@@ -2560,6 +2568,7 @@ PHP_FUNCTION(bartlby_get_server_by_id) {
 					add_assoc_long(return_value, "server_notify",srvmap[x].server_notify);
 					add_assoc_long(return_value, "server_flap_seconds",srvmap[x].server_flap_seconds);
 					add_assoc_long(return_value, "last_notify_send",srvmap[x].last_notify_send);
+					add_assoc_long(return_value, "server_dead",srvmap[x].server_dead);
 					add_assoc_long(return_value, "server_shm_place",x);
 					break;
 				}			
@@ -2737,6 +2746,7 @@ PHP_FUNCTION(bartlby_get_service) {
 		add_assoc_long(return_value, "server_last_notify_send",srvmap[svcmap[Z_LVAL_P(bartlby_service_id)].srv_place].last_notify_send);
 		add_assoc_long(return_value, "server_notify",srvmap[svcmap[Z_LVAL_P(bartlby_service_id)].srv_place].server_notify);
 		add_assoc_long(return_value, "server_enabled",srvmap[svcmap[Z_LVAL_P(bartlby_service_id)].srv_place].server_enabled);
+		add_assoc_long(return_value, "server_dead",srvmap[svcmap[Z_LVAL_P(bartlby_service_id)].srv_place].server_dead);
 			
 		
 		//Downtime 060120
