@@ -234,17 +234,15 @@ struct service {
 	int server_id;
 	int last_state;
 	int current_state;
-	int client_port;
+	
 	char  new_server_text[2048];
 	char  service_name[2048];
-	char  server_name[2048];
-	char  client_ip[2048];
+	
 	char  plugin[2048];
 	char  plugin_arguments[2048];
 	int check_interval;
 	int check_interval_original;
 	int last_check;
-	
 	
 	/*Time stuff*/
 	
@@ -265,7 +263,7 @@ struct service {
 	int notify_last_time;
 	int service_check_timeout;
 	
-	char server_icon[1024];
+	
 	
 	int service_ack;
 	
@@ -289,6 +287,7 @@ struct service {
 	
 	struct server * srv;
 	int srv_place;
+	
 	int is_server_dead;
 	
 };
@@ -306,7 +305,7 @@ struct worker {
 	
 	int worker_id;
 	int active;
-	char notify_plan[2048];	
+	char notify_plan[2048];
 	char password[2048];
 	
 	int escalation_count;

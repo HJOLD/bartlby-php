@@ -1449,12 +1449,12 @@ PHP_FUNCTION(bartlby_svc_map) {
 			}
 			
 			
-			add_assoc_long(subarray, "client_port", svcmap[x].client_port);
+			add_assoc_long(subarray, "client_port", srvmap[svcmap[x].srv_place].client_port);
 					
 			add_assoc_string(subarray, "new_server_text", svcmap[x].new_server_text, 1);
 			add_assoc_string(subarray, "service_name", svcmap[x].service_name, 1);
-			add_assoc_string(subarray, "server_name", svcmap[x].server_name, 1);
-			add_assoc_string(subarray, "client_ip", svcmap[x].client_ip, 1);
+			add_assoc_string(subarray, "server_name", srvmap[svcmap[x].srv_place].server_name, 1);
+			add_assoc_string(subarray, "client_ip", srvmap[svcmap[x].srv_place].client_ip, 1);
 			add_assoc_string(subarray, "plugin", svcmap[x].plugin, 1);
 			add_assoc_string(subarray, "plugin_arguments", svcmap[x].plugin_arguments, 1);
 			
@@ -1475,7 +1475,7 @@ PHP_FUNCTION(bartlby_svc_map) {
 			
 			
 			add_assoc_string(subarray, "service_var", svcmap[x].service_var, 1);
-			add_assoc_string(subarray, "server_icon", svcmap[x].server_icon, 1);
+			add_assoc_string(subarray, "server_icon", srvmap[svcmap[x].srv_place].server_icon, 1);
 			add_assoc_long(subarray, "service_check_timeout", svcmap[x].service_check_timeout);
 			add_assoc_long(subarray, "service_ack", svcmap[x].service_ack);
 			add_assoc_long(subarray, "service_retain", svcmap[x].service_retain);
@@ -2073,12 +2073,11 @@ PHP_FUNCTION(bartlby_get_service_by_id) {
 		add_assoc_long(return_value, "server_id", svc.server_id);
 		add_assoc_long(return_value, "last_state", svc.last_state);
 		add_assoc_long(return_value, "current_state", svc.current_state);
-		add_assoc_long(return_value, "client_port", svc.client_port);
+
 				
 		add_assoc_string(return_value, "new_server_text", svc.new_server_text, 1);
 		add_assoc_string(return_value, "service_name", svc.service_name, 1);
-		add_assoc_string(return_value, "server_name", svc.server_name, 1);
-		add_assoc_string(return_value, "client_ip", svc.client_ip, 1);
+
 		add_assoc_string(return_value, "plugin", svc.plugin, 1);
 		add_assoc_string(return_value, "plugin_arguments", svc.plugin_arguments, 1);
 		
@@ -2086,6 +2085,10 @@ PHP_FUNCTION(bartlby_get_service_by_id) {
 		add_assoc_long(return_value, "check_interval_original", svc.check_interval_original);
 		add_assoc_long(return_value, "last_check", svc.last_check);
 		
+		add_assoc_string(return_value, "server_name", svc.srv->server_name, 1);
+		add_assoc_string(return_value, "client_ip", svc.srv->client_ip, 1);
+		add_assoc_string(return_value, "server_icon", svc.srv->server_icon, 1);
+		add_assoc_long(return_value, "client_port", svc.srv->client_port);
 		
 		add_assoc_string(return_value, "exec_plan", svc.service_exec_plan, 1);
 		
@@ -2102,7 +2105,7 @@ PHP_FUNCTION(bartlby_get_service_by_id) {
 		
 		
 		add_assoc_string(return_value, "service_var", svc.service_var, 1);
-		add_assoc_string(return_value, "server_icon", svc.server_icon, 1);
+
 		
 		add_assoc_string(return_value, "service_snmp_community", svc.snmp_info.community, 1);
 		add_assoc_string(return_value, "service_snmp_objid", svc.snmp_info.objid, 1);
@@ -2117,6 +2120,7 @@ PHP_FUNCTION(bartlby_get_service_by_id) {
 		
 			
 	}
+	free(svc.srv);
 	dlclose(SOHandle);
 }
 
@@ -2705,12 +2709,12 @@ PHP_FUNCTION(bartlby_get_service) {
 		
 		
 		
-		add_assoc_long(return_value, "client_port", svcmap[Z_LVAL_P(bartlby_service_id)].client_port);
+		add_assoc_long(return_value, "client_port", srvmap[svcmap[Z_LVAL_P(bartlby_service_id)].srv_place].client_port);
 				
 		add_assoc_string(return_value, "new_server_text", svcmap[Z_LVAL_P(bartlby_service_id)].new_server_text, 1);
 		add_assoc_string(return_value, "service_name", svcmap[Z_LVAL_P(bartlby_service_id)].service_name, 1);
-		add_assoc_string(return_value, "server_name", svcmap[Z_LVAL_P(bartlby_service_id)].server_name, 1);
-		add_assoc_string(return_value, "client_ip", svcmap[Z_LVAL_P(bartlby_service_id)].client_ip, 1);
+		add_assoc_string(return_value, "server_name", srvmap[svcmap[Z_LVAL_P(bartlby_service_id)].srv_place].server_name, 1);
+		add_assoc_string(return_value, "client_ip", srvmap[svcmap[Z_LVAL_P(bartlby_service_id)].srv_place].client_ip, 1);
 		add_assoc_string(return_value, "plugin", svcmap[Z_LVAL_P(bartlby_service_id)].plugin, 1);
 		add_assoc_string(return_value, "plugin_arguments", svcmap[Z_LVAL_P(bartlby_service_id)].plugin_arguments, 1);
 		
@@ -2732,7 +2736,7 @@ PHP_FUNCTION(bartlby_get_service) {
 		
 		
 		add_assoc_string(return_value, "service_var", svcmap[Z_LVAL_P(bartlby_service_id)].service_var, 1);
-		add_assoc_string(return_value, "server_icon", svcmap[Z_LVAL_P(bartlby_service_id)].server_icon, 1);
+		
 		add_assoc_long(return_value, "service_check_timeout", svcmap[Z_LVAL_P(bartlby_service_id)].service_check_timeout);
 		add_assoc_long(return_value, "service_ack", svcmap[Z_LVAL_P(bartlby_service_id)].service_ack);
 		
@@ -2750,7 +2754,7 @@ PHP_FUNCTION(bartlby_get_service) {
 		
 		
 		add_assoc_string(return_value, "service_var",  svcmap[Z_LVAL_P(bartlby_service_id)].service_var, 1);
-		add_assoc_string(return_value, "server_icon",  svcmap[Z_LVAL_P(bartlby_service_id)].server_icon, 1);
+		add_assoc_string(return_value, "server_icon",  srvmap[svcmap[Z_LVAL_P(bartlby_service_id)].srv_place].server_icon, 1);
 		
 		add_assoc_string(return_value, "service_snmp_community",  svcmap[Z_LVAL_P(bartlby_service_id)].snmp_info.community, 1);
 		add_assoc_string(return_value, "service_snmp_objid",  svcmap[Z_LVAL_P(bartlby_service_id)].snmp_info.objid, 1);
