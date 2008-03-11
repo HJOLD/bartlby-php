@@ -17,7 +17,7 @@
 
   $Id$ 
 */
-#define BARTLBY_VERSION "1.2.8"
+#define BARTLBY_VERSION "1.3.1"
 
 
 #define DT_SERVICE 1
@@ -291,6 +291,9 @@ struct service {
 	
 	int is_server_dead;
 	
+	/**/
+	long renotify_interval; // interval to renotify
+	long escalate_seconds; //
 };
 
 struct service_sort {
@@ -370,5 +373,4 @@ typedef struct port_packet_struct{
 	
 	 
 } portier_packet;
-
 
