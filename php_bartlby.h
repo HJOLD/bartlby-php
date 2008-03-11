@@ -293,7 +293,7 @@ struct service {
 	
 	/**/
 	long renotify_interval; // interval to renotify
-	long escalate_seconds; //
+	long escalate_divisor; //
 };
 
 struct service_sort {
