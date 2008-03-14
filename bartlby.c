@@ -105,6 +105,7 @@ function_entry bartlby_functions[] = {
 	PHP_FE(bartlby_set_server_id, NULL)
 	PHP_FE(bartlby_set_service_id, NULL)
 	PHP_FE(bartlby_set_worker_id, NULL)
+	PHP_FE(bartlby_set_worker_state, NULL)
 	PHP_FE(bartlby_set_downtime_id, NULL)
 	
 	{NULL, NULL, NULL}	/* Must be the last line in bartlby_functions[] */
@@ -1219,6 +1220,77 @@ PHP_FUNCTION(bartlby_toggle_server_active) {
 			LOAD_SYMBOL(ModifyServer,SOHandle, "ModifyServer");
 			ModifyServer(&srvmap[Z_LVAL_P(bartlby_service_id)], Z_STRVAL_P(bartlby_config));
 		}
+		
+		dlclose(SOHandle);
+		shmdt(bartlby_address);
+		RETURN_LONG(r);
+		
+	
+	
+	} else {
+		php_error(E_WARNING, "SHM segment is not existing (bartlby running?)");	
+		free(shmtok);
+		RETURN_FALSE;
+	}	
+}
+
+PHP_FUNCTION(bartlby_set_worker_state) {
+	pval * bartlby_config;
+	pval * bartlby_worker_id;
+	pval * new_state;
+	char * shmtok;
+	int shm_id;
+	void * bartlby_address;
+	struct shm_header * shm_hdr;
+	int r;
+	struct worker * wrkmap;
+	struct service * svcmap;
+	
+	void * SOHandle;
+	char * dlmsg;
+	int (*UpdateWorker)(struct worker *, char *);
+	
+	
+	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &bartlby_config, &bartlby_worker_id, &new_state)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_long(bartlby_worker_id);
+	convert_to_long(new_state);
+	convert_to_string(bartlby_config);
+	
+	if (array_init(return_value) == FAILURE) {
+		RETURN_FALSE;
+	}
+	SOHandle=bartlby_get_sohandle(Z_STRVAL_P(bartlby_config));
+	if(SOHandle == NULL) {
+		php_error(E_WARNING, "bartlby SO error");	
+		RETURN_FALSE;	
+	}
+ 	
+		
+	
+	
+	
+	bartlby_address=bartlby_get_shm(Z_STRVAL_P(bartlby_config)); 
+	if(bartlby_address != NULL) {
+		shm_hdr=(struct shm_header *)(void *)bartlby_address;
+		svcmap=(struct service *)(void *)bartlby_address+sizeof(struct shm_header);
+		wrkmap=(struct worker *)(void*)&svcmap[shm_hdr->svccount]+20;
+		
+		
+		
+		if(Z_LVAL_P(bartlby_worker_id) > shm_hdr->wrkcount-1) {
+			php_error(E_WARNING, "Worker id out of bounds");	
+			RETURN_FALSE;	
+		}
+		
+		
+		r=1;
+		wrkmap[Z_LVAL_P(bartlby_worker_id)].active=Z_LVAL_P(new_state);
+		
+		LOAD_SYMBOL(UpdateWorker,SOHandle, "UpdateWorker");
+		UpdateWorker(&wrkmap[Z_LVAL_P(bartlby_worker_id)], Z_STRVAL_P(bartlby_config));
+		
 		
 		dlclose(SOHandle);
 		shmdt(bartlby_address);
@@ -2931,6 +3003,7 @@ PHP_FUNCTION(bartlby_get_worker) {
 		add_assoc_long(return_value, "escalation_minutes", wrkmap[Z_LVAL_P(bartlby_worker_id)].escalation_minutes);
 		
 		add_assoc_string(return_value, "enabled_triggers", wrkmap[Z_LVAL_P(bartlby_worker_id)].enabled_triggers,1);
+		add_assoc_long(return_value, "active", wrkmap[Z_LVAL_P(bartlby_worker_id)].active);
 		
 		shmdt(bartlby_address);
 		
